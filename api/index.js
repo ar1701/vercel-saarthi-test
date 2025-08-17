@@ -4,6 +4,9 @@ require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const express = require("express");
 const app = express();
 
+// Set initial database status to false - will be set to true when connected
+app.set('dbStatus', false);
+
 // Load environment variables
 const ENV = {
   DB_URL: process.env.ATLASDB_URL || process.env.MONGODB_URI,
