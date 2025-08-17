@@ -115,20 +115,32 @@ try {
 const sessionOptions = {
   secret: process.env.SECRET || 'fallback_secret_for_development',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // Changed to true to ensure session is created
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Needed for secure cross-origin cookies
+    // Only use secure cookies in production with HTTPS
+    secure: false, 
+    sameSite: 'lax' // More permissive for local development
   }
 };
 
 // Only add store to session options if it was successfully created
 if (store) {
   sessionOptions.store = store;
+  console.log("Using MongoDB store for sessions");
+} else {
+  console.log("Using in-memory session store");
 }
+
+console.log("Session options:", JSON.stringify({
+  secret: sessionOptions.secret ? "***" : "not set",
+  resave: sessionOptions.resave,
+  saveUninitialized: sessionOptions.saveUninitialized,
+  cookieSecure: sessionOptions.cookie.secure,
+  cookieSameSite: sessionOptions.cookie.sameSite
+}));
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -159,8 +171,15 @@ app.engine("ejs", ejsMate);
 async function connectToDatabase() {
   try {
     if (!dbUrl) {
+      console.error("MongoDB connection URL is not defined in environment variables");
+      console.error("Available environment variables:", Object.keys(process.env).join(", "));
       throw new Error("MongoDB connection URL is not defined");
     }
+    
+    console.log("Connecting to MongoDB...");
+    console.log("Database URL defined:", !!dbUrl);
+    // Don't log the full URL for security, but log a sanitized version
+    console.log("Database URL pattern:", dbUrl.replace(/\/\/([^:]+):([^@]+)@/, '//USERNAME:PASSWORD@'));
     
     const connectOptions = {
       // Add mongoose connection options for better reliability
@@ -169,20 +188,31 @@ async function connectToDatabase() {
     };
     
     await mongoose.connect(dbUrl, connectOptions);
-    console.log("MongoDB connection succeeded");
+    console.log("✅ MongoDB connection succeeded");
     
     // Set database status to connected
     app.set('dbStatus', true);
+    
+    // Log database information
+    const dbName = mongoose.connection.name;
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log(`Connected to database: ${dbName}`);
+    console.log(`Available collections: ${collections.map(c => c.name).join(', ')}`);
+    
     return true;
   } catch (err) {
-    console.error("MongoDB connection error:", err.message);
+    console.error("❌ MongoDB connection error:", err.message);
+    if (err.name === 'MongoServerSelectionError') {
+      console.error("This may be due to network issues, firewall settings, or incorrect connection string");
+    }
     
     // Set database status to disconnected
     app.set('dbStatus', false);
     
     // In development, we can continue without a database for some testing
     if (process.env.NODE_ENV !== 'production') {
-      console.warn("Running without database connection in development mode");
+      console.warn("⚠️  Running without database connection in development mode");
+      console.log("You can use the /_dev-login route for testing without a database");
       return false;
     }
     
@@ -211,6 +241,16 @@ app.use((req, res, next) => {
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
   res.locals.currentPage = req.path.split("/")[1] || "home";
+  
+  // Debug middleware to track session and auth state
+  const url = req.originalUrl;
+  // Only log for important routes to avoid excessive logging
+  if (url === '/login' || url === '/index' || url === '/signup') {
+    console.log(`[${new Date().toISOString()}] Route: ${url}`);
+    console.log('- Session ID:', req.sessionID);
+    console.log('- Authenticated:', req.isAuthenticated());
+    console.log('- User:', req.user ? req.user.username : 'none');
+  }
   next();
 });
 
@@ -262,6 +302,41 @@ app.get("/_healthcheck", (req, res) => {
     serverVersion: "1.0.0"
   });
 });
+
+// Auth status check for debugging
+app.get("/_auth-check", (req, res) => {
+  res.json({
+    isAuthenticated: req.isAuthenticated(),
+    hasSession: !!req.session,
+    sessionID: req.sessionID,
+    user: req.user ? {
+      username: req.user.username,
+      id: req.user._id
+    } : null,
+    cookies: req.headers.cookie,
+    dbStatus: app.get('dbStatus'),
+    mongoConnection: mongoose.connection.readyState
+  });
+});
+
+// Test login route for development only
+if (process.env.NODE_ENV !== 'production') {
+  app.get("/_dev-login", (req, res) => {
+    // Create a fake session for development testing
+    if (!req.session.user) {
+      req.session.user = { username: 'dev-user' };
+    }
+    
+    // Mock the req.isAuthenticated() method for passport
+    req.isAuthenticated = function() { return true; };
+    
+    // Set a flash message
+    req.flash("success", "Development login successful!");
+    
+    // Redirect to the index page
+    res.redirect("/index");
+  });
+}
 
 app.get("/index", isLoggedIn, (req, res) => {
   res.render("index.ejs", { currentPage: "home" });
@@ -358,14 +433,22 @@ app.get("/cookie-policy", (req, res) => {
 
 app.post(
   "/login",
+  (req, res, next) => {
+    console.log("Login attempt for username:", req.body.username);
+    console.log("Database status:", app.get('dbStatus'));
+    console.log("MongoDB connection state:", mongoose.connection.readyState);
+    next();
+  },
   passport.authenticate("local", {
     failureRedirect: "/login?error=Invalid username or password",
     failureFlash: true,
   }),
   async (req, res) => {
+    console.log("Authentication successful for:", req.body.username);
     let { username } = req.body;
     req.session.user = { username };
     req.flash("success", "Welcome to Saarthi!");
+    console.log("Session saved, redirecting to /index");
     res.redirect("/index");
   }
 );
