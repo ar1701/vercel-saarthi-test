@@ -1,17 +1,6 @@
 // Forward to api/index.js for Vercel serverless functions
-module.exports = require('./api/index.js');
-
-// Legacy code kept for reference
-/*
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const fs = require("fs");
-
-const dotenv = require("dotenv");
-dotenv.config();
-*/
-
-// Access your API key as an environment variable (see "Set up your API key" above)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// This file is the entry point for the Vercel deployment
+module.exports = require("./api/index.js");
 
 const readline = require("readline");
 
