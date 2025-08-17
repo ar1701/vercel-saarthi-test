@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Saarthi - AI-Powered Education Platform</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Carousel Section */
+      .carousel-section {
+        position: relative;
+        height: 600px;
+        overflow: hidden;
+      }
+
+      .carousel-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .carousel-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
+        display: flex;
+        align-items: center;
+      }
+
+      .carousel-slide.active {
+        opacity: 1;
+      }
+
+      .carousel-slide img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+      }
+
+      .carousel-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+        text-align: left;
+        max-width: 600px;
+        padding: 2rem;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: var(--radius);
+        margin-left: 2rem;
+      }
+
+      .carousel-subtitle {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+      }
+
+      .carousel-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+      }
+
+      .carousel-description {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+
+      .carousel-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .carousel-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 2px solid transparent;
+      }
+
+      .carousel-btn.primary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .carousel-btn.primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .carousel-btn.secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+      }
+
+      .carousel-btn.secondary:hover {
+        background: white;
+        color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
+      .carousel-btn.prev,
+      .carousel-btn.next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: var(--transition);
+        z-index: 3;
+      }
+
+      .carousel-btn.prev {
+        left: 1rem;
+      }
+
+      .carousel-btn.next {
+        right: 1rem;
+      }
+
+      .carousel-btn.prev:hover,
+      .carousel-btn.next:hover {
+        background: var(--primary-color);
+      }
+
+      /* Features Section */
+      .features-section {
+        padding: 4rem 0;
+      }
+
+      .section-title {
+        text-align: center;
+        color: var(--text-primary);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+
+      .feature-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        border: 1px solid var(--border);
+        text-align: center;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+      }
+
+      .feature-card h3 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .feature-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      /* Stats Section */
+      .stats-section {
+        background: var(--background);
+        padding: 4rem 0;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        text-align: center;
+      }
+
+      .stat-item {
+        padding: 2rem;
+      }
+
+      .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 768px) {
+        .carousel-section {
+          height: 400px;
+        }
+
+        .carousel-content {
+          margin-left: 1rem;
+          margin-right: 1rem;
+          padding: 1rem;
+        }
+
+        .carousel-title {
+          font-size: 1.8rem;
+        }
+
+        .carousel-description {
+          font-size: 1rem;
+        }
+
+        .carousel-buttons {
+          flex-direction: column;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <!-- Carousel Section -->
+    <section class="carousel-section">
+      <div class="carousel-container">
+        <div class="carousel-slide active">
+          <img src="/img/carousel-1.jpg" alt="Education Innovation" />
+          <div class="carousel-content">
+            <div class="container">
+              <h5 class="carousel-subtitle">
+                Innovative Education, AI Enhanced
+              </h5>
+              <h1 class="carousel-title">Streamlining education with AI</h1>
+              <p class="carousel-description">
+                "By leveraging AI, educators can optimize teaching strategies
+                and streamline administrative tasks, fostering a more efficient
+                learning environment. Embracing AI in education empowers
+                students with essential skills for success in the 21st century."
+              </p>
+              <div class="carousel-buttons">
+                <a href="/courses" class="carousel-btn primary">Read More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-slide">
+          <img src="/img/carousel-2.jpg" alt="Future Learning" />
+          <div class="carousel-content">
+            <div class="container">
+              <h5 class="carousel-subtitle">Future of Learning</h5>
+              <h1 class="carousel-title">AI-Powered Educational Excellence</h1>
+              <p class="carousel-description">
+                "Experience the next generation of education with our AI-powered
+                platform. Personalized learning paths, instant problem solving,
+                and comprehensive analytics to track your progress and achieve
+                academic excellence."
+              </p>
+              <div class="carousel-buttons">
+                <a href="/courses" class="carousel-btn primary"
+                  >Start Learning</a
+                >
+                <a href="/about" class="carousel-btn secondary">Learn More</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn prev" onclick="changeSlide(-1)">❮</button>
+        <button class="carousel-btn next" onclick="changeSlide(1)">❯</button>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <div class="container">
+        <h2 class="section-title">Why Choose Saarthi?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3>AI-Powered Chatbot</h3>
+            <p>
+              Get instant help with your studies 24/7 through our intelligent
+              chatbot that provides personalized assistance for all your
+              academic questions.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-camera"></i>
+            </div>
+            <h3>Visual Problem Solving</h3>
+            <p>
+              Simply snap a picture of any problem and get detailed explanations
+              tailored to your learning style and level.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3>Dynamic Curriculum</h3>
+            <p>
+              Our curriculum evolves with the latest educational standards and
+              technological advancements to keep you future-ready.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">10K+</div>
+            <div class="stat-label">Students Helped</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Schools Partnered</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Questions Answered</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">99%</div>
+            <div class="stat-label">Satisfaction Rate</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Carousel functionality
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".carousel-slide");
+
+      function showSlide(n) {
+        slides.forEach((slide) => slide.classList.remove("active"));
+        currentSlide = (n + slides.length) % slides.length;
+        slides[currentSlide].classList.add("active");
+      }
+
+      function changeSlide(direction) {
+        showSlide(currentSlide + direction);
+      }
+
+      // Auto-advance carousel
+      setInterval(() => {
+        changeSlide(1);
+      }, 5000);
+
+      // Animate stats on scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+          }
+        });
+      });
+
+      const statNumbers = document.querySelectorAll(".stat-number");
+      statNumbers.forEach((stat) => {
+        stat.style.opacity = "0";
+        stat.style.transform = "translateY(20px)";
+        stat.style.transition = "all 0.6s ease-out";
+        observer.observe(stat);
+      });
+
+      // Add hover effects to feature cards
+      const featureCards = document.querySelectorAll(".feature-card");
+      featureCards.forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-12px) scale(1.02)";
+        });
+
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0) scale(1)";
+        });
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

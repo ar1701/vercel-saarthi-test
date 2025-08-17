@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Essay Writer - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+      }
+
+      .page-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .page-header .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .essay-form {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .form-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .submit-btn:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .result-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: none;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .result-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--background);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .essay-content {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+      }
+
+      .essay-content h1,
+      .essay-content h2,
+      .essay-content h3 {
+        color: var(--text-primary);
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .essay-content p {
+        margin-bottom: 1rem;
+      }
+
+      .essay-content ul,
+      .essay-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+      }
+
+      .essay-content li {
+        margin-bottom: 0.5rem;
+      }
+
+      .essay-content strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .essay-content em {
+        color: var(--text-secondary);
+      }
+
+      .essay-content blockquote {
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1rem;
+        margin: 1rem 0;
+        font-style: italic;
+        color: var(--text-secondary);
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .result-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-pen-fancy"></i> AI Essay Writer</h1>
+          <p>
+            Generate well-structured essays on any topic with AI assistance.
+            Perfect for assignments and creative writing.
+          </p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Essay Form -->
+        <div class="essay-form">
+          <h2 class="form-title">Essay Requirements</h2>
+          <form id="essayForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="topic">Essay Topic</label>
+                <input
+                  type="text"
+                  id="topic"
+                  name="topic"
+                  placeholder="Enter your essay topic..."
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="type">Essay Type</label>
+                <select id="type" name="type" required>
+                  <option value="">Select essay type</option>
+                  <option value="argumentative">Argumentative</option>
+                  <option value="expository">Expository</option>
+                  <option value="narrative">Narrative</option>
+                  <option value="descriptive">Descriptive</option>
+                  <option value="persuasive">Persuasive</option>
+                  <option value="analytical">Analytical</option>
+                  <option value="compare and contrast">
+                    Compare and Contrast
+                  </option>
+                  <option value="cause and effect">Cause and Effect</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="length">Word Count</label>
+                <select id="length" name="length" required>
+                  <option value="">Select word count</option>
+                  <option value="300-500">300-500 words (Short)</option>
+                  <option value="500-800">500-800 words (Medium)</option>
+                  <option value="800-1200">800-1200 words (Long)</option>
+                  <option value="1200-1500">1200-1500 words (Extended)</option>
+                  <option value="1500-2000">
+                    1500-2000 words (Comprehensive)
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="additional">Additional Requirements (Optional)</label>
+              <textarea
+                id="additional"
+                name="additional"
+                placeholder="Any specific requirements, style preferences, or additional context..."
+              ></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+              <i class="fas fa-magic"></i> Generate Essay
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading-spinner"></div>
+          <p>Generating your essay... This may take a few moments.</p>
+        </div>
+
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer">
+          <div class="result-header">
+            <h3 class="result-title">Generated Essay</h3>
+            <div class="result-actions">
+              <button class="action-btn" onclick="copyEssay()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="action-btn" onclick="downloadEssay()">
+                <i class="fas fa-download"></i> Download
+              </button>
+              <button class="action-btn" onclick="generateNew()">
+                <i class="fas fa-plus"></i> New Essay
+              </button>
+            </div>
+          </div>
+          <div class="essay-content" id="essayContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const essayForm = document.getElementById("essayForm");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const submitBtn = document.getElementById("submitBtn");
+      const essayContent = document.getElementById("essayContent");
+
+      essayForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {
+          topic: formData.get("topic"),
+          type: formData.get("type"),
+          length: formData.get("length"),
+          additional: formData.get("additional"),
+        };
+
+        // Show loading state
+        loadingContainer.style.display = "block";
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch("/essay-writer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            // Display the essay
+            essayContent.innerHTML = parseMarkdown(result.result);
+            resultContainer.style.display = "block";
+            successMessage.textContent = "Essay generated successfully!";
+            successMessage.style.display = "block";
+          } else {
+            throw new Error(result.error || "Failed to generate essay");
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = "block";
+        } finally {
+          loadingContainer.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      function parseMarkdown(text) {
+        // Simple markdown to HTML conversion
+        return text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+          .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+          .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+          .replace(/^\* (.*$)/gim, "<li>$1</li>")
+          .replace(/^- (.*$)/gim, "<li>$1</li>")
+          .replace(/\n\n/g, "</p><p>")
+          .replace(/^(.+)$/gm, "<p>$1</p>")
+          .replace(/<p><\/p>/g, "")
+          .replace(/<p><h/g, "<h")
+          .replace(/<\/h[1-6]><\/p>/g, "</h$1>")
+          .replace(/<p><li>/g, "<ul><li>")
+          .replace(/<\/li><\/p>/g, "</li></ul>");
+      }
+
+      function copyEssay() {
+        const text = essayContent.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          successMessage.textContent = "Essay copied to clipboard!";
+          successMessage.style.display = "block";
+          setTimeout(() => {
+            successMessage.style.display = "none";
+          }, 3000);
+        });
+      }
+
+      function downloadEssay() {
+        const text = essayContent.innerText;
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "essay.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function generateNew() {
+        essayForm.reset();
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+      }
+
+      // Add form input effects
+      const formInputs = document.querySelectorAll(
+        ".form-group input, .form-group select, .form-group textarea"
+      );
+      formInputs.forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookie Policy - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .policy-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .policy-section {
+        margin-bottom: 2rem;
+      }
+
+      .policy-section h2 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 0.5rem;
+      }
+
+      .policy-section h3 {
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.75rem 0;
+      }
+
+      .policy-section p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      .policy-section ul {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+      }
+
+      .policy-section li {
+        margin-bottom: 0.5rem;
+      }
+
+      .cookie-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        background: var(--background);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .cookie-table th,
+      .cookie-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .cookie-table th {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+      }
+
+      .cookie-table tr:hover {
+        background: rgba(99, 102, 241, 0.05);
+      }
+
+      .last-updated {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1rem;
+        border-left: 4px solid var(--primary-color);
+        margin-top: 2rem;
+      }
+
+      .last-updated p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .cookie-table {
+          font-size: 0.9rem;
+        }
+
+        .cookie-table th,
+        .cookie-table td {
+          padding: 0.75rem 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>
+            <i class="fas fa-cookie-bite"></i>
+            Cookie Policy
+          </h1>
+          <p>
+            Learn about how we use cookies and similar technologies to enhance
+            your experience on our platform.
+          </p>
+        </div>
+
+        <!-- Policy Content -->
+        <div class="policy-container">
+          <div class="policy-section">
+            <h2>What Are Cookies?</h2>
+
+            <p>
+              Cookies are small text files that are stored on your device when
+              you visit our website. They help us provide you with a better
+              experience by remembering your preferences and analyzing how you
+              use our platform.
+            </p>
+          </div>
+
+          <div class="policy-section">
+            <h2>How We Use Cookies</h2>
+
+            <p>We use cookies for the following purposes:</p>
+            <ul>
+              <li>
+                <strong>Essential Cookies:</strong> Required for basic website
+                functionality
+              </li>
+              <li>
+                <strong>Performance Cookies:</strong> Help us understand how
+                visitors interact with our website
+              </li>
+              <li>
+                <strong>Functional Cookies:</strong> Remember your preferences
+                and settings
+              </li>
+              <li>
+                <strong>Analytics Cookies:</strong> Provide insights into
+                website usage and performance
+              </li>
+            </ul>
+          </div>
+
+          <div class="policy-section">
+            <h2>Types of Cookies We Use</h2>
+
+            <table class="cookie-table">
+              <thead>
+                <tr>
+                  <th>Cookie Type</th>
+                  <th>Purpose</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Session Cookies</td>
+                  <td>
+                    Maintain your login session and preferences during your
+                    visit
+                  </td>
+                  <td>Until browser is closed</td>
+                </tr>
+                <tr>
+                  <td>Authentication Cookies</td>
+                  <td>Remember your login status and user preferences</td>
+                  <td>30 days</td>
+                </tr>
+                <tr>
+                  <td>Analytics Cookies</td>
+                  <td>Track website usage and performance metrics</td>
+                  <td>2 years</td>
+                </tr>
+                <tr>
+                  <td>Preference Cookies</td>
+                  <td>Remember your language, theme, and other settings</td>
+                  <td>1 year</td>
+                </tr>
+                <tr>
+                  <td>Security Cookies</td>
+                  <td>Protect against fraud and ensure secure browsing</td>
+                  <td>Session</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="policy-section">
+            <h2>Third-Party Cookies</h2>
+
+            <p>
+              We may use third-party services that also place cookies on your
+              device:
+            </p>
+            <ul>
+              <li>
+                <strong>Google Analytics:</strong> Website analytics and
+                performance tracking
+              </li>
+              <li>
+                <strong>Google Fonts:</strong> Typography and design elements
+              </li>
+              <li><strong>Font Awesome:</strong> Icons and visual elements</li>
+              <li><strong>Chart.js:</strong> Data visualization and charts</li>
+            </ul>
+          </div>
+
+          <div class="policy-section">
+            <h2>Managing Your Cookie Preferences</h2>
+
+            <h3>Browser Settings</h3>
+            <p>You can control cookies through your browser settings:</p>
+            <ul>
+              <li>
+                Chrome: Settings > Privacy and Security > Cookies and other site
+                data
+              </li>
+              <li>
+                Firefox: Options > Privacy & Security > Cookies and Site Data
+              </li>
+              <li>Safari: Preferences > Privacy > Manage Website Data</li>
+              <li>
+                Edge: Settings > Cookies and site permissions > Cookies and site
+                data
+              </li>
+            </ul>
+
+            <h3>Cookie Consent</h3>
+            <p>
+              When you first visit our website, you'll see a cookie consent
+              banner. You can:
+            </p>
+            <ul>
+              <li>Accept all cookies for the best experience</li>
+              <li>Customize your preferences</li>
+              <li>Reject non-essential cookies</li>
+            </ul>
+          </div>
+
+          <div class="policy-section">
+            <h2>Impact of Disabling Cookies</h2>
+
+            <p>
+              If you choose to disable cookies, some features of our platform
+              may not work properly:
+            </p>
+            <ul>
+              <li>You may need to log in repeatedly</li>
+              <li>Your preferences won't be remembered</li>
+              <li>Some interactive features may be limited</li>
+              <li>Personalization features may not work</li>
+            </ul>
+          </div>
+
+          <div class="policy-section">
+            <h2>Updates to This Policy</h2>
+
+            <p>
+              We may update this Cookie Policy from time to time to reflect
+              changes in our practices or for other operational, legal, or
+              regulatory reasons. We will notify you of any material changes by
+              posting the updated policy on our website.
+            </p>
+          </div>
+
+          <div class="policy-section">
+            <h2>Contact Us</h2>
+
+            <p>
+              If you have any questions about our use of cookies, please contact
+              us at:
+            </p>
+            <ul>
+              <li>Email: privacy@saarthi.edu</li>
+              <li>Phone: +1 (555) 123-4567</li>
+              <li>Address: 123 Education Street, Learning City, LC 12345</li>
+            </ul>
+          </div>
+
+          <div class="last-updated">
+            <p><strong>Last Updated:</strong> December 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

@@ -1,0 +1,257 @@
+<!-- Modern Footer Component -->
+<footer class="modern-footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <div class="footer-brand">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Saarthi</span>
+        </div>
+        <p>
+          Empowering students with AI-driven education solutions for a brighter
+          future.
+        </p>
+        <div class="social-links">
+          <a
+            href="https://ayushraj.xyz/"
+            class="social-link"
+            aria-label="Portfolio"
+            title="Portfolio"
+          >
+            <i class="fa-solid fa-briefcase"></i>
+          </a>
+          <a href="https://x.com/ayushrajj17" class="social-link"
+            ><i class="fab fa-twitter"></i
+          ></a>
+          <a href="https://linkedin.com/in/ayush-raj17" class="social-link"
+            ><i class="fab fa-linkedin-in"></i
+          ></a>
+          <a
+            href="https://instagram.com/ayushrajjofficial?igshid=ZDdkNTZiNTM="
+            class="social-link"
+            ><i class="fab fa-instagram"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="/index">Home</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/courses">AI Services</a></li>
+          <li><a href="/grading">Grade Calculator</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>AI Services</h4>
+        <ul class="footer-links">
+          <li><a href="/chat">AI Assistant</a></li>
+          <li><a href="/form">Problem Solver</a></li>
+          <li><a href="/ask">Smart Q&A</a></li>
+          <li><a href="/syllabus">Syllabus Generator</a></li>
+          <li><a href="/essay-writer">Essay Writer</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Contact Info</h4>
+        <div class="contact-info">
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>CUSAT, Kochi, Kerala, India</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>+91 6203392086</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>ayushrajj30@gmail.com</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <span>Mon - Fri: 9:00 AM - 6:00 PM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p>&copy; 2024 Saarthi. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-of-service">Terms of Service</a>
+          <a href="/cookie-policy">Cookie Policy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .modern-footer {
+    background: linear-gradient(
+      135deg,
+      var(--primary-dark),
+      var(--primary-color)
+    );
+    color: white;
+    padding: 3rem 0 1rem;
+    margin-top: 4rem;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-section h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: white;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .footer-brand i {
+    color: var(--accent-color);
+  }
+
+  .footer-section p {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .social-link:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-links li {
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .footer-links a:hover {
+    color: var(--accent-color);
+    padding-left: 0.5rem;
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .contact-item i {
+    color: var(--accent-color);
+    width: 20px;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+  }
+
+  .footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-bottom p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+
+  .footer-bottom-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-bottom-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: var(--transition);
+  }
+
+  .footer-bottom-links a:hover {
+    color: var(--accent-color);
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .footer-bottom-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .footer-bottom-links {
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testimonials - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+      }
+
+      .page-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .page-header .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .testimonials-section {
+        padding: 4rem 0;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .section-title h2 {
+        color: var(--text-primary);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .section-title p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+      }
+
+      .testimonial-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .testimonial-card::before {
+        content: '"';
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-size: 4rem;
+        color: var(--primary-color);
+        opacity: 0.1;
+        font-family: serif;
+      }
+
+      .testimonial-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .testimonial-content {
+        margin-bottom: 1.5rem;
+      }
+
+      .testimonial-text {
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-style: italic;
+        margin-bottom: 1rem;
+      }
+
+      .testimonial-rating {
+        display: flex;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .star {
+        color: #fbbf24;
+        font-size: 1.1rem;
+      }
+
+      .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .author-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .author-info h4 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .author-role {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .stats-section {
+        background: var(--surface);
+        padding: 4rem 0;
+        margin-top: 4rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      .cta-section {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        margin-top: 4rem;
+      }
+
+      .cta-content h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .cta-content p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cta-btn {
+        background: white;
+        color: var(--primary-color);
+        padding: 1rem 2rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+      }
+
+      .cta-btn:hover {
+        background: var(--background);
+        transform: translateY(-2px);
+        color: var(--primary-color);
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .testimonials-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cta-content h2 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-quote-left"></i> Testimonials</h1>
+          <p>
+            Hear from students, teachers, and parents about their experience
+            with Saarthi's AI-powered learning platform.
+          </p>
+        </div>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section">
+          <div class="section-title">
+            <h2>What Our Users Say</h2>
+            <p>
+              Real stories from real people who have transformed their learning
+              journey with Saarthi.
+            </p>
+          </div>
+
+          <div class="testimonials-grid">
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "Saarthi's AI assistant has been a game-changer for my
+                  studies. It explains complex concepts in simple terms and
+                  helps me understand topics I struggled with before."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">P</div>
+                <div class="author-info">
+                  <h4>Priya Sharma</h4>
+                  <div class="author-role">Class 12 Student</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "The problem solver feature is incredible! I can just upload a
+                  photo of my math homework and get step-by-step solutions. It's
+                  like having a tutor available 24/7."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">A</div>
+                <div class="author-info">
+                  <h4>Arjun Patel</h4>
+                  <div class="author-role">Engineering Student</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "As a teacher, I love how Saarthi helps me create personalized
+                  learning plans for my students. The analytics help me identify
+                  areas where each student needs more support."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">M</div>
+                <div class="author-info">
+                  <h4>Mrs. Meena Reddy</h4>
+                  <div class="author-role">Mathematics Teacher</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "The grade calculator and analytics have helped my daughter
+                  track her progress effectively. She's more motivated now that
+                  she can see her improvement over time."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">R</div>
+                <div class="author-info">
+                  <h4>Rajesh Kumar</h4>
+                  <div class="author-role">Parent</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "The essay writer feature is amazing! It helps me structure my
+                  thoughts and provides excellent examples. My writing has
+                  improved significantly since using Saarthi."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">S</div>
+                <div class="author-info">
+                  <h4>Sarah Johnson</h4>
+                  <div class="author-role">College Student</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "The flashcard generator is perfect for exam preparation. It
+                  creates relevant questions and helps me memorize important
+                  concepts quickly and effectively."
+                </p>
+                <div class="testimonial-rating">
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                  <i class="fas fa-star star"></i>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">K</div>
+                <div class="author-info">
+                  <h4>Kavya Singh</h4>
+                  <div class="author-role">Medical Student</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+          <div class="container">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Student Satisfaction</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Grade Improvement</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">AI Support Available</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Topics Covered</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+          <div class="container">
+            <div class="cta-content">
+              <h2>Ready to Transform Your Learning?</h2>
+              <p>
+                Join thousands of students who are already experiencing the
+                future of AI-powered education.
+              </p>
+              <a href="/courses" class="cta-btn">
+                <i class="fas fa-rocket"></i>
+                Start Learning Today
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // Add smooth animations
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animate testimonial cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        });
+
+        const testimonialCards = document.querySelectorAll(".testimonial-card");
+        testimonialCards.forEach((card) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(30px)";
+          card.style.transition = "all 0.6s ease-out";
+          observer.observe(card);
+        });
+
+        // Animate stats on scroll
+        const statNumbers = document.querySelectorAll(".stat-number");
+        statNumbers.forEach((stat) => {
+          const finalNumber = parseInt(stat.textContent);
+          let currentNumber = 0;
+          const increment = finalNumber / 50;
+
+          const updateNumber = () => {
+            if (currentNumber < finalNumber) {
+              currentNumber += increment;
+              stat.textContent =
+                Math.floor(currentNumber) +
+                (stat.textContent.includes("%") ? "%" : "") +
+                (stat.textContent.includes("+") ? "+" : "") +
+                (stat.textContent.includes("/") ? "/7" : "");
+              requestAnimationFrame(updateNumber);
+            } else {
+              stat.textContent =
+                stat.textContent.replace(/\+$/, "") +
+                (stat.textContent.includes("%") ? "%" : "") +
+                (stat.textContent.includes("+") ? "+" : "") +
+                (stat.textContent.includes("/") ? "/7" : "");
+            }
+          };
+
+          const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                updateNumber();
+                statObserver.unobserve(entry.target);
+              }
+            });
+          });
+
+          statObserver.observe(stat);
+        });
+      });
+    </script>
+  </body>
+</html>

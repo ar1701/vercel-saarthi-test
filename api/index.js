@@ -1,0 +1,1051 @@
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
+const express = require("express");
+const app = express();
+
+// Load environment variables
+const ENV = {
+  DB_URL: process.env.ATLASDB_URL || process.env.MONGODB_URI,
+  SECRET: process.env.SECRET || 'development_secret_key',
+  GEMINI_KEY: process.env.GEMINI_API_KEY,
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  IS_VERCEL: !!process.env.VERCEL
+};
+
+// Log environment status but not sensitive values
+console.log(`Environment: ${ENV.NODE_ENV}`);
+console.log(`Running on Vercel: ${ENV.IS_VERCEL}`);
+console.log(`Database URL defined: ${!!ENV.DB_URL}`);
+console.log(`Gemini API Key defined: ${!!ENV.GEMINI_KEY}`);
+
+const mongoose = require("mongoose");
+const axios = require("axios");
+const fs = require("fs");
+const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+const cloudinary = ENV.CLOUDINARY_URL ? require("cloudinary").v2 : null;
+const multer = require("multer");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Initialize services based on available environment variables
+const dbUrl = ENV.DB_URL;
+const genAI = ENV.GEMINI_KEY ? new GoogleGenerativeAI(ENV.GEMINI_KEY) : null;
+
+// Conditionally require models to handle missing database
+let User, Profile, QuizResult;
+try {
+  User = require("../model/user.js");
+  Profile = require("../model/profile.js");
+  QuizResult = require("../model/quiz.js");
+} catch (err) {
+  console.error("Error loading models:", err.message);
+}
+
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const LocalStrategy = require("passport-local");
+const passport = require("passport");
+const flash = require("connect-flash");
+const middleware = require("../middleware.js");
+const isLoggedIn = middleware.isLoggedIn;
+// const { storage } = require("./cloudConfig.js");
+
+async function extractImage(url) {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: url,
+      responseType: "arraybuffer",
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error extracting image:", error);
+    throw error;
+  }
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+// Check if database URL is available
+if (!dbUrl) {
+  console.error("WARNING: Database URL is not defined! Check your environment variables.");
+}
+
+// Create MongoStore with better error handling
+let store;
+try {
+  store = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+      secret: process.env.SECRET || 'fallback_secret_for_development',
+    },
+    touchAfter: 24 * 60 * 60,
+    autoRemove: 'native',
+    ttl: 7 * 24 * 60 * 60 // 1 week
+  });
+
+  store.on("error", (error) => {
+    console.error("MongoStore Error:", error);
+  });
+} catch (err) {
+  console.error("Failed to create MongoStore:", err);
+  // Fallback to memory store if in development to prevent crashes
+  if (process.env.NODE_ENV !== 'production') {
+    console.log("Using fallback memory store for session");
+    // No store means it will use the default MemoryStore
+    store = undefined;
+  } else {
+    throw err; // In production, we want to know if this fails
+  }
+}
+
+const sessionOptions = {
+  secret: process.env.SECRET || 'fallback_secret_for_development',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Needed for secure cross-origin cookies
+  }
+};
+
+// Only add store to session options if it was successfully created
+if (store) {
+  sessionOptions.store = store;
+}
+
+app.use(session(sessionOptions));
+app.use(flash());
+
+// Body parsing middleware - use only one set
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "../views"));
+
+// Serve static files from various paths for maximum compatibility
+// This makes assets available at multiple URL patterns
+app.use(express.static(path.join(__dirname, "../public"))); // Serve at root path (/)
+app.use("/public", express.static(path.join(__dirname, "../public"))); // Also serve at /public
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+// Special handling for common asset directories
+app.use("/css", express.static(path.join(__dirname, "../public/css")));
+app.use("/js", express.static(path.join(__dirname, "../public/js")));
+app.use("/img", express.static(path.join(__dirname, "../public/img")));
+app.use("/images", express.static(path.join(__dirname, "../public/img")));
+
+app.use(methodOverride("_method"));
+app.engine("ejs", ejsMate);
+
+// Connect to MongoDB with improved error handling
+async function connectToDatabase() {
+  try {
+    if (!dbUrl) {
+      throw new Error("MongoDB connection URL is not defined");
+    }
+    
+    const connectOptions = {
+      // Add mongoose connection options for better reliability
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000
+    };
+    
+    await mongoose.connect(dbUrl, connectOptions);
+    console.log("MongoDB connection succeeded");
+    
+    // Set database status to connected
+    app.set('dbStatus', true);
+    return true;
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+    
+    // Set database status to disconnected
+    app.set('dbStatus', false);
+    
+    // In development, we can continue without a database for some testing
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn("Running without database connection in development mode");
+      return false;
+    }
+    
+    // In production, try again after a delay
+    if (process.env.VERCEL) {
+      console.log("Will retry database connection in 5 seconds...");
+      setTimeout(() => connectToDatabase(), 5000);
+    }
+    
+    return false;
+  }
+}
+
+// Initialize database connection
+connectToDatabase();
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  res.locals.currUser = req.user;
+  res.locals.currentPage = req.path.split("/")[1] || "home";
+  next();
+});
+
+// Only start the server when not running on Vercel
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log("listening to the port " + port);
+  });
+}
+
+// For Vercel serverless functions
+// Handle direct invocation from Vercel
+if (process.env.VERCEL) {
+  console.log("Running in Vercel serverless environment");
+}
+
+// Export for Vercel serverless
+module.exports = app;
+
+// Routes
+app.get("/", (req, res) => {
+  res.redirect("/main");
+});
+
+// Health check route for debugging Vercel deployment
+app.get("/_healthcheck", (req, res) => {
+  res.json({
+    status: "ok",
+    environment: ENV.NODE_ENV,
+    isVercel: ENV.IS_VERCEL,
+    databaseConnected: !!mongoose.connection.readyState,
+    databaseUrlDefined: !!ENV.DB_URL,
+    geminiApiKeyDefined: !!ENV.GEMINI_KEY,
+    secretKeyDefined: !!ENV.SECRET,
+    timestamp: new Date().toISOString(),
+    serverVersion: "1.0.0"
+  });
+});
+
+app.get("/index", isLoggedIn, (req, res) => {
+  res.render("index.ejs", { currentPage: "home" });
+});
+
+app.get("/about", isLoggedIn, (req, res) => {
+  res.render("about.ejs", { currentPage: "about" });
+});
+
+app.get("/contact", isLoggedIn, (req, res) => {
+  res.render("contact.ejs", { currentPage: "contact" });
+});
+
+app.get("/team", isLoggedIn, (req, res) => {
+  res.render("team.ejs", { currentPage: "team" });
+});
+
+app.get("/testimonial", isLoggedIn, (req, res) => {
+  res.render("testimonial.ejs", { currentPage: "testimonial" });
+});
+
+app.get("/courses", isLoggedIn, (req, res) => {
+  res.render("courses.ejs", { currentPage: "courses" });
+});
+
+app.get("/form", isLoggedIn, (req, res) => {
+  res.render("form.ejs", { currentPage: "form" });
+});
+
+app.get("/search", isLoggedIn, (req, res) => {
+  res.render("search.ejs", { currentPage: "search" });
+});
+
+app.get("/syllabus", isLoggedIn, (req, res) => {
+  res.render("syllabus.ejs", { currentPage: "syllabus" });
+});
+
+app.get("/ask", isLoggedIn, (req, res) => {
+  res.render("ask.ejs", { currentPage: "ask" });
+});
+
+app.get("/chat", isLoggedIn, (req, res) => {
+  res.render("chat.ejs", { currentPage: "chat" });
+});
+
+app.get("/main", (req, res) => {
+  res.render("main.ejs");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
+});
+
+app.get("/signup", (req, res) => {
+  res.render("signup.ejs");
+});
+
+app.get("/grading", isLoggedIn, (req, res) => {
+  res.render("grading.ejs", { currentPage: "grading" });
+});
+
+app.get("/essay-writer", isLoggedIn, (req, res) => {
+  res.render("essay-writer.ejs", { currentPage: "essay-writer" });
+});
+
+app.get("/code-explainer", isLoggedIn, (req, res) => {
+  res.render("code-explainer.ejs", { currentPage: "code-explainer" });
+});
+
+app.get("/study-planner", isLoggedIn, (req, res) => {
+  res.render("study-planner.ejs", { currentPage: "study-planner" });
+});
+
+app.get("/flashcard-generator", isLoggedIn, (req, res) => {
+  res.render("flashcard-generator.ejs", { currentPage: "flashcard-generator" });
+});
+
+app.get("/quiz-generator", isLoggedIn, (req, res) => {
+  res.render("quiz-generator.ejs", { currentPage: "quiz-generator" });
+});
+
+// Policy Pages
+app.get("/privacy-policy", (req, res) => {
+  res.render("privacy-policy.ejs", { currentPage: "privacy-policy" });
+});
+
+app.get("/terms-of-service", (req, res) => {
+  res.render("terms-of-service.ejs", { currentPage: "terms-of-service" });
+});
+
+app.get("/cookie-policy", (req, res) => {
+  res.render("cookie-policy.ejs", { currentPage: "cookie-policy" });
+});
+
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login?error=Invalid username or password",
+    failureFlash: true,
+  }),
+  async (req, res) => {
+    let { username } = req.body;
+    req.session.user = { username };
+    req.flash("success", "Welcome to Saarthi!");
+    res.redirect("/index");
+  }
+);
+
+app.get("/signup", (req, res) => {
+  res.render("signup.ejs");
+});
+
+app.post("/signup", async (req, res) => {
+  try {
+    let { username, email, phone, password } = req.body;
+    req.session.user = { username, email, phone };
+    const newUser = new User({ username, email, phone });
+
+    await User.register(newUser, password);
+
+    const newProfile = new Profile({
+      user: newUser._id,
+      gender: "",
+      bio: "",
+    });
+    await newProfile.save();
+    res.redirect("/login");
+  } catch (e) {
+    res.redirect("/signup");
+  }
+});
+
+app.post("/syllabus", isLoggedIn, async (req, res) => {
+  try {
+    let { std, subject } = req.body;
+    let result = await syllabusGen(std, subject);
+    res.json({ result: result });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble generating the syllabus right now. Please try again in a moment.",
+    });
+  }
+});
+
+// New AI-powered features
+app.post("/essay-writer", isLoggedIn, async (req, res) => {
+  try {
+    const { topic, type, length } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `Write a ${type} essay on "${topic}" with approximately ${length} words.
+
+Guidelines:
+- Use clear, engaging language
+- Include an introduction, body paragraphs, and conclusion
+- Provide relevant examples and evidence
+- Use proper essay structure and formatting
+- Make it educational and informative
+- Use markdown formatting for better readability
+
+Please write a well-structured essay:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    res.json({ result: text });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble generating the essay right now. Please try again in a moment.",
+    });
+  }
+});
+
+app.post("/code-explainer", isLoggedIn, async (req, res) => {
+  try {
+    const { code, language } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `Explain this ${language} code in detail:
+
+\`\`\`${language}
+${code}
+\`\`\`
+
+Please provide:
+1. A clear explanation of what the code does
+2. Line-by-line breakdown of important parts
+3. Key concepts and programming principles used
+4. Potential improvements or optimizations
+5. Common use cases for this type of code
+
+Use markdown formatting for better readability.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    res.json({ result: text });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble explaining the code right now. Please try again in a moment.",
+    });
+  }
+});
+
+app.post("/study-planner", isLoggedIn, async (req, res) => {
+  try {
+    const { subjects, hours, days, goals } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `Create a personalized study plan for a student with the following requirements:
+
+Subjects: ${subjects}
+Available study hours per day: ${hours}
+Study days per week: ${days}
+Learning goals: ${goals}
+
+Please provide:
+1. A weekly study schedule
+2. Time allocation for each subject
+3. Study techniques and strategies
+4. Break and rest periods
+5. Progress tracking methods
+6. Tips for maintaining motivation
+
+Use markdown formatting and make it practical and achievable.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    res.json({ result: text });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble creating the study plan right now. Please try again in a moment.",
+    });
+  }
+});
+
+app.post("/flashcard-generator", isLoggedIn, async (req, res) => {
+  try {
+    const { topic, subject, count } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `Generate ${count} flashcards for ${subject} on the topic: "${topic}"
+
+Format each flashcard as:
+**Question:** [Clear, concise question]
+**Answer:** [Detailed, educational answer]
+
+Guidelines:
+- Questions should test understanding, not just memorization
+- Answers should be comprehensive but concise
+- Include a mix of difficulty levels
+- Cover key concepts and important details
+- Make them engaging and educational
+
+Use markdown formatting for better readability.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    res.json({ result: text });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble generating flashcards right now. Please try again in a moment.",
+    });
+  }
+});
+
+// Quiz Generator - Generate Quiz Questions
+app.post("/quiz-generator", isLoggedIn, async (req, res) => {
+  try {
+    const { topic, difficulty, type, count } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const enhancedPrompt = `Generate a ${difficulty} level quiz on the topic: "${topic}" with exactly ${count} ${type} questions.
+
+IMPORTANT: You must respond with ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "questionNumber": 1,
+      "question": "What is the capital of France?",
+      "options": ["A. London", "B. Paris", "C. Berlin", "D. Madrid"],
+      "correctAnswer": "B",
+      "explanation": "Paris is the capital and largest city of France."
+    }
+  ]
+}
+
+Requirements:
+- For MCQ questions: Always provide exactly 4 options labeled A, B, C, D
+- For Subjective questions: Use the options field for key points and explanation for detailed answer
+- Make questions appropriate for ${difficulty} difficulty level
+- Include clear, educational explanations
+- Ensure questions test understanding, not just memorization
+- Do not include any text before or after the JSON object
+- The response must be valid JSON that can be parsed directly
+
+Generate exactly ${count} questions for the topic: ${topic}`;
+
+    const result = await model.generateContent(enhancedPrompt);
+    const response = await result.response;
+    const text = response.text();
+
+    // Try to parse JSON, if it fails, try to extract JSON from the response
+    try {
+      const quizData = JSON.parse(text);
+      res.json({ quiz: quizData, topic, difficulty, type, count });
+    } catch (parseError) {
+      // Try to extract JSON from the response if it contains extra text
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const extractedJson = JSON.parse(jsonMatch[0]);
+          res.json({ quiz: extractedJson, topic, difficulty, type, count });
+        } else {
+          throw new Error("No JSON found in response");
+        }
+      } catch (extractError) {
+        res.status(500).json({
+          error:
+            "Failed to generate structured quiz. Please try again with a different topic.",
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error: "Failed to generate quiz. Please try again.",
+    });
+  }
+});
+
+// Submit Quiz Answers
+app.post("/submit-quiz", isLoggedIn, async (req, res) => {
+  try {
+    const { topic, difficulty, type, count, answers, timeTaken } = req.body;
+    const userId = req.user._id;
+
+    // Calculate score
+    let correctAnswers = 0;
+    const userAnswers = [];
+
+    for (let i = 0; i < answers.length; i++) {
+      const userAnswer = answers[i].userAnswer;
+      const correctAnswer = answers[i].correctAnswer;
+      const isCorrect = userAnswer === correctAnswer;
+
+      if (isCorrect) correctAnswers++;
+
+      userAnswers.push({
+        questionNumber: i + 1,
+        userAnswer,
+        correctAnswer,
+        isCorrect,
+      });
+    }
+
+    const score = Math.round((correctAnswers / answers.length) * 100);
+
+    // Save to database
+    const quizResult = new QuizResult({
+      user: userId,
+      topic,
+      difficulty,
+      questionType: type,
+      totalQuestions: parseInt(count),
+      correctAnswers,
+      score,
+      userAnswers,
+      timeTaken: parseInt(timeTaken),
+    });
+
+    await quizResult.save();
+
+    res.json({
+      success: true,
+      score,
+      correctAnswers,
+      totalQuestions: answers.length,
+      userAnswers,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error: "Failed to submit quiz. Please try again.",
+    });
+  }
+});
+
+// Get Quiz History
+app.get("/quiz-history", isLoggedIn, async (req, res) => {
+  try {
+    const quizResults = await QuizResult.find({ user: req.user._id })
+      .sort({ completedAt: -1 })
+      .limit(10);
+
+    res.json({ quizResults });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      error: "Failed to fetch quiz history.",
+    });
+  }
+});
+
+app.post("/ask", isLoggedIn, async (req, res) => {
+  try {
+    let { question } = req.body;
+    let result = await textQuery(question);
+    res.json({ result: result });
+  } catch (error) {
+    console.error("Error in /ask:", error);
+
+    // Check if it's a Gemini API overload error
+    if (error.status === 503 || error.message?.includes("overloaded")) {
+      return res.status(503).json({
+        error:
+          "The AI service is currently experiencing high traffic. Please try again in a few minutes.",
+      });
+    }
+
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
+    });
+  }
+});
+
+app.post("/chat", isLoggedIn, async (req, res) => {
+  try {
+    const userInput = req.body.message;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Enhanced prompt for better structured responses
+    const enhancedPrompt = `You are an AI educational assistant for Saarthi, an innovative learning platform. 
+
+Please provide clear, structured, and educational responses to the user's question. Follow these guidelines:
+
+1. **Structure your response** with clear headings using markdown (## for main sections, ### for subsections)
+2. **Use bullet points** for lists and key concepts
+3. **Include examples** where helpful
+4. **Keep explanations** concise but comprehensive
+5. **Use bold text** for important terms and concepts
+6. **Format code** using \`code blocks\` when applicable
+7. **Be encouraging** and supportive in your tone
+8. **Adapt to the user's level** - assume they are a student seeking to learn
+
+User Question: ${userInput}
+
+Please provide a well-structured educational response:`;
+
+    const result = await model.generateContent(enhancedPrompt);
+    const response = await result.response;
+    const text = response.text();
+
+    res.json({ message: text });
+  } catch (error) {
+    console.error("Error in /chat:", error);
+
+    // Check if it's a Gemini API overload error
+    if (error.status === 503 || error.message?.includes("overloaded")) {
+      return res.status(503).json({
+        message:
+          "The AI service is currently experiencing high traffic. Please try again in a few minutes.",
+      });
+    }
+
+    res.status(500).json({
+      message:
+        "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
+    });
+  }
+});
+
+app.post("/form", isLoggedIn, upload.single("image"), async (req, res) => {
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file uploaded" });
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Enhanced prompt for image analysis
+    const enhancedPrompt = `You are an AI educational assistant analyzing an image that contains a problem or question. 
+
+Please provide a comprehensive, well-structured solution following these guidelines:
+
+1. **Start with a clear overview** of what you see in the image
+2. **Break down the problem** into understandable steps
+3. **Provide the solution** with detailed explanations
+4. **Use markdown formatting** for better structure:
+   - Use ## for main sections
+   - Use ### for subsections
+   - Use bullet points for lists
+   - Use **bold** for important terms
+   - Use \`code\` for mathematical expressions or code
+5. **Include relevant concepts** and explanations
+6. **Be encouraging** and educational in your tone
+7. **If it's a math problem**, show step-by-step calculations
+8. **If it's a conceptual question**, provide clear explanations with examples
+
+Please analyze the image and provide a structured educational response:`;
+
+    const imageParts = [
+      {
+        inlineData: {
+          data: fs.readFileSync(req.file.path).toString("base64"),
+          mimeType: "image/jpeg",
+        },
+      },
+    ];
+
+    const result = await model.generateContent([enhancedPrompt, ...imageParts]);
+    const response = await result.response;
+    const text = response.text();
+
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
+
+    res.json({ result: text });
+  } catch (error) {
+    console.error("Error in /form:", error);
+    // Clean up uploaded file if it exists
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    // Check if it's a Gemini API overload error
+    if (error.status === 503 || error.message?.includes("overloaded")) {
+      return res.status(503).json({
+        error:
+          "The AI service is currently experiencing high traffic. Please try again in a few minutes.",
+      });
+    }
+
+    res.status(500).json({
+      error:
+        "I apologize, but I'm having trouble analyzing your image right now. Please try again with a clearer image.",
+    });
+  }
+});
+
+// Set up a route for logging out
+app.get("/logout", (req, res, next) => {
+  req.logout(function (err) {
+    if (err) {
+      console.error("Error logging out:", err);
+      return next(err); // Forward the error to the error handler
+    }
+    res.redirect("/main"); // Only one response
+  });
+});
+
+// Error information route
+app.get("/_debug", (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Saarthi - Environment Debug</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+          h1 { color: #333; }
+          .box { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+          .error { color: #d9534f; }
+          .success { color: #5cb85c; }
+          code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+          pre { background: #f5f5f5; padding: 15px; overflow-x: auto; }
+        </style>
+      </head>
+      <body>
+        <h1>Saarthi Environment Status</h1>
+        
+        <div class="box">
+          <h2>Environment Variables</h2>
+          <p>Database URL: <span class="${ENV.DB_URL ? 'success' : 'error'}">${ENV.DB_URL ? 'Defined' : 'Missing'}</span></p>
+          <p>Secret Key: <span class="${ENV.SECRET ? 'success' : 'error'}">${ENV.SECRET ? 'Defined' : 'Missing'}</span></p>
+          <p>Gemini API Key: <span class="${ENV.GEMINI_KEY ? 'success' : 'error'}">${ENV.GEMINI_KEY ? 'Defined' : 'Missing'}</span></p>
+          <p>Node Environment: ${ENV.NODE_ENV}</p>
+          <p>Running on Vercel: ${ENV.IS_VERCEL ? 'Yes' : 'No'}</p>
+        </div>
+
+        <div class="box">
+          <h2>How to Fix</h2>
+          <p>To fix the missing environment variables:</p>
+          <ol>
+            <li>Go to your Vercel project settings</li>
+            <li>Click on "Environment Variables"</li>
+            <li>Add the following environment variables:
+              <ul>
+                <li><code>ATLASDB_URL</code>: Your MongoDB connection string</li>
+                <li><code>SECRET</code>: A random string for session encryption</li>
+                <li><code>GEMINI_API_KEY</code>: Your Google Gemini API key</li>
+              </ul>
+            </li>
+            <li>Redeploy your application</li>
+          </ol>
+        </div>
+
+        <div class="box">
+          <h2>Example .env File Structure</h2>
+          <pre>ATLASDB_URL=mongodb+srv://username:password@cluster.mongodb.net/database
+SECRET=your_random_secret_string
+GEMINI_API_KEY=your_gemini_api_key</pre>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+app.all("*", (req, res) => {
+  // If the database is not connected, show an error page
+  if (!ENV.DB_URL) {
+    return res.status(500).send(`
+      <html>
+        <head>
+          <title>Saarthi - Configuration Error</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 600px; margin: 0 auto; text-align: center; }
+            h1 { color: #d9534f; }
+            .box { border: 1px solid #d9534f; padding: 20px; margin-bottom: 20px; border-radius: 5px; background: #f9f2f4; }
+            a { color: #0275d8; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+          </style>
+        </head>
+        <body>
+          <h1>⚠️ Configuration Error</h1>
+          <div class="box">
+            <p>The application is missing critical environment variables and cannot start properly.</p>
+            <p>Please visit <a href="/_debug">the debug page</a> for more information on how to fix this issue.</p>
+          </div>
+          <p>If you're the site administrator, please configure your environment variables in the Vercel dashboard.</p>
+        </body>
+      </html>
+    `);
+  }
+  
+  res.redirect("/main");
+});
+
+function fileToGenerativePart(path, mimeType) {
+  try {
+    if (!fs.existsSync(path)) {
+      throw new Error(`File not found: ${path}`);
+    }
+    return {
+      inlineData: {
+        data: Buffer.from(fs.readFileSync(path)).toString("base64"),
+        mimeType,
+      },
+    };
+  } catch (error) {
+    console.error(`Error reading file ${path}:`, error);
+    throw error;
+  }
+}
+
+async function problemSolving() {
+  const maxRetries = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = "";
+      const imageParts = [fileToGenerativePart("prob.jpg", "image/jpeg")];
+      const result = await model.generateContent([prompt, ...imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      console.log(text);
+      return text;
+    } catch (error) {
+      console.error(`Error in problemSolving (attempt ${attempt}):`, error);
+      lastError = error;
+
+      // If it's an overload error, wait before retrying
+      if (error.status === 503 || error.message?.includes("overloaded")) {
+        if (attempt < maxRetries) {
+          console.log(
+            `Gemini API overloaded, retrying in ${attempt * 2} seconds...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+          continue;
+        }
+      }
+
+      // For other errors or after max retries, throw the error
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+
+async function textQuery(query) {
+  const maxRetries = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+      const enhancedPrompt = `You are an AI educational assistant for Saarthi. Please provide a clear, structured response to: "${query}"
+
+Guidelines:
+- Use markdown formatting for structure
+- Include bullet points for key concepts
+- Use **bold** for important terms
+- Be educational and encouraging
+- Keep it concise but comprehensive`;
+
+      const result = await model.generateContent(enhancedPrompt);
+      const response = await result.response;
+      const text = response.text();
+      return text;
+    } catch (error) {
+      console.error(`Error in textQuery (attempt ${attempt}):`, error);
+      lastError = error;
+
+      // If it's an overload error, wait before retrying
+      if (error.status === 503 || error.message?.includes("overloaded")) {
+        if (attempt < maxRetries) {
+          console.log(
+            `Gemini API overloaded, retrying in ${attempt * 2} seconds...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+          continue;
+        }
+      }
+
+      // For other errors or after max retries, throw the error
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+
+async function syllabusGen(std, sub) {
+  const maxRetries = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+      const enhancedPrompt = `Generate a comprehensive syllabus for ${std} grade ${sub} subject based on current National Educational Policy (NEP 2020).
+
+Please structure the response with:
+- Clear section headings using markdown (## for main sections, ### for subsections)
+- Organized topics and subtopics
+- Learning objectives for each unit
+- Suggested activities and assessments
+- Duration for each unit
+- Key skills to be developed
+
+Guidelines:
+- Adapt content to the age and cognitive level of ${std} students
+- Include modern pedagogical approaches
+- Focus on skill development and practical application
+- Use bullet points for better readability
+- Make it engaging and student-friendly
+
+Please provide a well-structured syllabus:`;
+
+      const result = await model.generateContent(enhancedPrompt);
+      const response = await result.response;
+      const text = response.text();
+      return text;
+    } catch (error) {
+      console.error(`Error in syllabusGen (attempt ${attempt}):`, error);
+      lastError = error;
+
+      // If it's an overload error, wait before retrying
+      if (error.status === 503 || error.message?.includes("overloaded")) {
+        if (attempt < maxRetries) {
+          console.log(
+            `Gemini API overloaded, retrying in ${attempt * 2} seconds...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+          continue;
+        }
+      }
+
+      // For other errors or after max retries, throw the error
+      throw error;
+    }
+  }
+
+  throw lastError;
+}

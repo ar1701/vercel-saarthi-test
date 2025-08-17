@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Explainer - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+      }
+
+      .page-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .page-header .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .code-form {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .form-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+        font-family: "Courier New", monospace;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 200px;
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .submit-btn:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .result-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: none;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .result-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--background);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .code-content {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+      }
+
+      .code-content h1,
+      .code-content h2,
+      .code-content h3 {
+        color: var(--text-primary);
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .code-content p {
+        margin-bottom: 1rem;
+      }
+
+      .code-content ul,
+      .code-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+      }
+
+      .code-content li {
+        margin-bottom: 0.5rem;
+      }
+
+      .code-content strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .code-content em {
+        color: var(--text-secondary);
+      }
+
+      .code-content pre {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: var(--radius);
+        overflow-x: auto;
+        margin: 1rem 0;
+      }
+
+      .code-content code {
+        background: #f1f5f9;
+        color: var(--text-primary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .result-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-code"></i> Code Explainer</h1>
+          <p>
+            Get detailed explanations of programming code with line-by-line
+            breakdowns and optimization suggestions.
+          </p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Code Form -->
+        <div class="code-form">
+          <h2 class="form-title">Code Analysis</h2>
+          <form id="codeForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="language">Programming Language</label>
+                <select id="language" name="language" required>
+                  <option value="">Select language</option>
+                  <option value="Python">Python</option>
+                  <option value="JavaScript">JavaScript</option>
+                  <option value="Java">Java</option>
+                  <option value="C++">C++</option>
+                  <option value="C#">C#</option>
+                  <option value="PHP">PHP</option>
+                  <option value="Ruby">Ruby</option>
+                  <option value="Go">Go</option>
+                  <option value="Rust">Rust</option>
+                  <option value="Swift">Swift</option>
+                  <option value="Kotlin">Kotlin</option>
+                  <option value="TypeScript">TypeScript</option>
+                  <option value="HTML/CSS">HTML/CSS</option>
+                  <option value="SQL">SQL</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="code">Your Code</label>
+              <textarea
+                id="code"
+                name="code"
+                placeholder="Paste your code here..."
+                required
+              ></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+              <i class="fas fa-search"></i> Explain Code
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading-spinner"></div>
+          <p>Analyzing your code... This may take a few moments.</p>
+        </div>
+
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer">
+          <div class="result-header">
+            <h3 class="result-title">Code Explanation</h3>
+            <div class="result-actions">
+              <button class="action-btn" onclick="copyExplanation()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="action-btn" onclick="downloadExplanation()">
+                <i class="fas fa-download"></i> Download
+              </button>
+              <button class="action-btn" onclick="explainNew()">
+                <i class="fas fa-plus"></i> New Code
+              </button>
+            </div>
+          </div>
+          <div class="code-content" id="codeContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const codeForm = document.getElementById("codeForm");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const submitBtn = document.getElementById("submitBtn");
+      const codeContent = document.getElementById("codeContent");
+
+      codeForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {
+          code: formData.get("code"),
+          language: formData.get("language"),
+        };
+
+        // Show loading state
+        loadingContainer.style.display = "block";
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch("/code-explainer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            // Display the explanation
+            codeContent.innerHTML = parseMarkdown(result.result);
+            resultContainer.style.display = "block";
+            successMessage.textContent =
+              "Code explanation generated successfully!";
+            successMessage.style.display = "block";
+          } else {
+            throw new Error(result.error || "Failed to explain code");
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = "block";
+        } finally {
+          loadingContainer.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      function parseMarkdown(text) {
+        // Enhanced markdown to HTML conversion for code
+        return text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+          .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+          .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+          .replace(/^\* (.*$)/gim, "<li>$1</li>")
+          .replace(/^- (.*$)/gim, "<li>$1</li>")
+          .replace(/```(\w+)?\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          .replace(/\n\n/g, "</p><p>")
+          .replace(/^(.+)$/gm, "<p>$1</p>")
+          .replace(/<p><\/p>/g, "")
+          .replace(/<p><h/g, "<h")
+          .replace(/<\/h[1-6]><\/p>/g, "</h$1>")
+          .replace(/<p><li>/g, "<ul><li>")
+          .replace(/<\/li><\/p>/g, "</li></ul>");
+      }
+
+      function copyExplanation() {
+        const text = codeContent.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          successMessage.textContent = "Explanation copied to clipboard!";
+          successMessage.style.display = "block";
+          setTimeout(() => {
+            successMessage.style.display = "none";
+          }, 3000);
+        });
+      }
+
+      function downloadExplanation() {
+        const text = codeContent.innerText;
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "code_explanation.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function explainNew() {
+        codeForm.reset();
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+      }
+
+      // Add form input effects
+      const formInputs = document.querySelectorAll(
+        ".form-group input, .form-group select, .form-group textarea"
+      );
+      formInputs.forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
+      });
+    </script>
+  </body>
+</html>

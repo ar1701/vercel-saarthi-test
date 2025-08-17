@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saarthi - AI-Powered Education Platform</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .hero-section {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 2rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+      }
+
+      .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .auth-buttons {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        display: flex;
+        gap: 1rem;
+        z-index: 10;
+      }
+
+      .auth-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .auth-btn-primary {
+        background: white;
+        color: var(--primary-color);
+      }
+
+      .auth-btn-primary:hover {
+        background: var(--background);
+        transform: translateY(-2px);
+      }
+
+      .auth-btn-outline {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+      }
+
+      .auth-btn-outline:hover {
+        background: white;
+        color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
+      .hero-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .hero-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #fff, #e0e7ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .hero-stat {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        min-width: 120px;
+      }
+
+      .hero-stat i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent-color);
+      }
+
+      .hero-stat-number {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .hero-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .features-section {
+        padding: 5rem 0;
+        background: var(--background);
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+      }
+
+      .section-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+      }
+
+      .feature-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--accent-color)
+        );
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .feature-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .feature-icon.primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+      }
+
+      .feature-icon.secondary {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      }
+
+      .feature-icon.accent {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+      }
+
+      .feature-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+
+      .feature-details {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .cta-section {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--primary-color)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+      }
+
+      .cta-content {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .cta-description {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+      }
+
+      .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .cta-btn {
+        padding: 1rem 2rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .cta-btn-primary {
+        background: white;
+        color: var(--primary-color);
+      }
+
+      .cta-btn-primary:hover {
+        background: var(--background);
+        transform: translateY(-2px);
+      }
+
+      .cta-btn-outline {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+      }
+
+      .cta-btn-outline:hover {
+        background: white;
+        color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .hero-stats {
+          gap: 1rem;
+        }
+
+        .hero-stat {
+          min-width: 100px;
+        }
+
+        .auth-buttons {
+          top: 1rem;
+          right: 1rem;
+          gap: 0.5rem;
+        }
+
+        .auth-btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.8rem;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .cta-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .cta-btn {
+          width: 100%;
+          max-width: 300px;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <!-- Auth Buttons -->
+      <div class="auth-buttons">
+        <a href="/login" class="auth-btn auth-btn-outline">
+          <i class="fas fa-sign-in-alt"></i>
+          Login
+        </a>
+        <a href="/signup" class="auth-btn auth-btn-primary">
+          <i class="fas fa-user-plus"></i>
+          Sign Up
+        </a>
+      </div>
+
+      <div class="container">
+        <div class="hero-content">
+          <img
+            src="/img/CodeCrew,jpg.jpeg"
+            alt="Saarthi Logo"
+            class="hero-logo"
+          />
+          <h1 class="hero-title">Welcome to Saarthi</h1>
+          <p class="hero-subtitle">
+            Unleash the Power of <strong>AI-Enhanced Education</strong> - One
+            Platform for Schools and Students. Experience the future of learning
+            with our innovative AI-powered tools and personalized learning
+            experiences.
+          </p>
+
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <i class="fas fa-users"></i>
+              <span class="hero-stat-number">10K+</span>
+              <span class="hero-stat-label">Students</span>
+            </div>
+            <div class="hero-stat">
+              <i class="fas fa-school"></i>
+              <span class="hero-stat-number">500+</span>
+              <span class="hero-stat-label">Schools</span>
+            </div>
+            <div class="hero-stat">
+              <i class="fas fa-robot"></i>
+              <span class="hero-stat-number">24/7</span>
+              <span class="hero-stat-label">AI Support</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Why Choose Saarthi?</h2>
+          <p class="section-subtitle">
+            Discover the innovative features that make Saarthi the leading
+            AI-powered education platform
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon primary">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="feature-title">AI-Powered Chatbot</h3>
+            <p class="feature-description">
+              Get instant help with your studies 24/7
+            </p>
+            <p class="feature-details">
+              Our intelligent chatbot provides personalized assistance for all
+              your academic questions, making learning more accessible and
+              efficient. Get instant answers, explanations, and step-by-step
+              guidance for any subject.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon secondary">
+              <i class="fas fa-camera"></i>
+            </div>
+            <h3 class="feature-title">Visual Problem Solving</h3>
+            <p class="feature-description">
+              Upload images for instant solutions
+            </p>
+            <p class="feature-details">
+              Simply snap a picture of any problem and get detailed explanations
+              tailored to your learning style and level. Perfect for math
+              problems, diagrams, and complex concepts that need visual
+              analysis.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon accent">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3 class="feature-title">Dynamic Curriculum</h3>
+            <p class="feature-description">Stay ahead with updated content</p>
+            <p class="feature-details">
+              Our curriculum evolves with the latest educational standards and
+              technological advancements to keep you future-ready. Access
+              comprehensive study materials, practice tests, and personalized
+              learning paths.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon primary">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="feature-title">Progress Analytics</h3>
+            <p class="feature-description">Track your learning journey</p>
+            <p class="feature-details">
+              Monitor your academic progress with detailed analytics and
+              insights. Identify strengths, weaknesses, and areas for
+              improvement with our comprehensive performance tracking system.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon secondary">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <h3 class="feature-title">Personalized Learning</h3>
+            <p class="feature-description">Adaptive to your learning style</p>
+            <p class="feature-details">
+              Our AI adapts to your unique learning style and pace, providing
+              customized content and recommendations that match your preferences
+              and academic goals.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon accent">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="feature-title">Secure & Reliable</h3>
+            <p class="feature-description">Your data is safe with us</p>
+            <p class="feature-details">
+              We prioritize the security and privacy of your educational data.
+              Our platform uses industry-standard encryption and security
+              measures to protect your information.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-content">
+          <h2 class="cta-title">Ready to Transform Your Learning?</h2>
+          <p class="cta-description">
+            Join thousands of students and educators who are already
+            experiencing the future of education. Start your journey with
+            Saarthi today and unlock your full potential.
+          </p>
+          <div class="cta-buttons">
+            <a href="/login" class="cta-btn cta-btn-primary">
+              <i class="fas fa-sign-in-alt"></i>
+              Get Started
+            </a>
+            <a href="/courses" class="cta-btn cta-btn-outline">
+              <i class="fas fa-play"></i>
+              Explore Features
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+
+    <script>
+      // Add smooth animations
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animate stats on scroll
+        const stats = document.querySelectorAll(".hero-stat-number");
+        stats.forEach((stat) => {
+          const finalValue = stat.textContent;
+          let currentValue = 0;
+          const increment = parseInt(finalValue) / 50;
+
+          const updateStat = () => {
+            if (currentValue < parseInt(finalValue)) {
+              currentValue += increment;
+              stat.textContent =
+                Math.floor(currentValue) +
+                (finalValue.includes("+") ? "+" : "");
+              requestAnimationFrame(updateStat);
+            } else {
+              stat.textContent = finalValue;
+            }
+          };
+
+          updateStat();
+        });
+
+        // Add scroll animations
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        });
+
+        const featureCards = document.querySelectorAll(".feature-card");
+        featureCards.forEach((card) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(30px)";
+          card.style.transition = "all 0.6s ease-out";
+          observer.observe(card);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grade Calculator & Analytics - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .grading-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .subjects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .subject-input {
+        background: var(--background);
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        transition: var(--transition);
+      }
+
+      .subject-input:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .subject-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .subject-field {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      .subject-field:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .action-btn {
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .action-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .result-card {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid var(--border);
+        transition: var(--transition);
+      }
+
+      .result-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .result-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+      }
+
+      .result-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .result-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .result-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .analytics-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .chart-container {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-top: 1.5rem;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--border);
+      }
+
+      .chart-placeholder {
+        text-align: center;
+        color: var(--text-secondary);
+      }
+
+      .chart-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      .progress-section {
+        margin-top: 2rem;
+      }
+
+      .progress-item {
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .progress-label {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .progress-value {
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 4px;
+        transition: width 0.6s ease;
+      }
+
+      .insights-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+      }
+
+      .insight-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--background);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .insight-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .insight-content h4 {
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .insight-content p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .subjects-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .actions-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>
+            <i class="fas fa-chart-line"></i> Grade Calculator & Analytics
+          </h1>
+          <p>
+            Calculate your grades, analyze your academic performance, and get
+            personalized insights to improve your learning journey.
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Grading System -->
+        <div class="grading-container">
+          <h2 class="section-title">
+            <i class="fas fa-calculator"></i> Grade Calculator
+          </h2>
+
+          <div class="subjects-grid">
+            <div class="subject-input">
+              <label class="subject-label">English</label>
+              <input
+                type="number"
+                id="eng"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="subject-input">
+              <label class="subject-label">Mathematics</label>
+              <input
+                type="number"
+                id="mat"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="subject-input">
+              <label class="subject-label">Physics</label>
+              <input
+                type="number"
+                id="phy"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="subject-input">
+              <label class="subject-label">Computer Science</label>
+              <input
+                type="number"
+                id="comp"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="subject-input">
+              <label class="subject-label">Science</label>
+              <input
+                type="number"
+                id="sci"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="subject-input">
+              <label class="subject-label">Additional Subject</label>
+              <input
+                type="number"
+                id="add"
+                class="subject-field"
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+
+          <div class="actions-grid">
+            <button class="action-btn" onclick="calculateTotal()">
+              <i class="fas fa-plus"></i> Calculate Total
+            </button>
+            <button class="action-btn" onclick="calculateAverage()">
+              <i class="fas fa-divide"></i> Calculate Average
+            </button>
+            <button class="action-btn" onclick="calculateGrade()">
+              <i class="fas fa-star"></i> Get Grade
+            </button>
+            <button class="action-btn" onclick="generateReport()">
+              <i class="fas fa-file-alt"></i> Generate Report
+            </button>
+          </div>
+
+          <div class="results-grid" id="resultsGrid" style="display: none">
+            <div class="result-card">
+              <div class="result-icon">
+                <i class="fas fa-plus"></i>
+              </div>
+              <div class="result-title">Total Marks</div>
+              <div class="result-value" id="totalValue">0</div>
+              <div class="result-subtitle">Out of 600</div>
+            </div>
+            <div class="result-card">
+              <div class="result-icon">
+                <i class="fas fa-percentage"></i>
+              </div>
+              <div class="result-title">Average</div>
+              <div class="result-value" id="averageValue">0%</div>
+              <div class="result-subtitle">Overall Performance</div>
+            </div>
+            <div class="result-card">
+              <div class="result-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="result-title">Grade</div>
+              <div class="result-value" id="gradeValue">-</div>
+              <div class="result-subtitle" id="gradeSubtitle">
+                Performance Level
+              </div>
+            </div>
+            <div class="result-card">
+              <div class="result-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="result-title">Rank</div>
+              <div class="result-value" id="rankValue">-</div>
+              <div class="result-subtitle">Class Position</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics-section">
+          <h2 class="section-title">
+            <i class="fas fa-chart-bar"></i> Performance Analytics
+          </h2>
+
+          <div class="progress-section">
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">English</span>
+                <span class="progress-value" id="engProgress">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="engFill" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Mathematics</span>
+                <span class="progress-value" id="matProgress">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="matFill" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Physics</span>
+                <span class="progress-value" id="phyProgress">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="phyFill" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Computer Science</span>
+                <span class="progress-value" id="compProgress">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  id="compFill"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Science</span>
+                <span class="progress-value" id="sciProgress">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="sciFill" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="performanceChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Insights Section -->
+        <div class="insights-section">
+          <h2 class="section-title">
+            <i class="fas fa-lightbulb"></i> Learning Insights
+          </h2>
+
+          <div id="insightsContainer">
+            <div class="insight-item">
+              <div class="insight-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div class="insight-content">
+                <h4>Welcome to Analytics!</h4>
+                <p>
+                  Enter your marks in the grade calculator above to get
+                  personalized insights and recommendations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const subjects = ["eng", "mat", "phy", "comp", "sci", "add"];
+      const subjectNames = [
+        "English",
+        "Mathematics",
+        "Physics",
+        "Computer Science",
+        "Science",
+        "Additional Subject",
+      ];
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+        setTimeout(() => {
+          errorDiv.style.display = "none";
+        }, 5000);
+      }
+
+      function getMarks() {
+        const marks = {};
+        subjects.forEach((subject) => {
+          const value = document.getElementById(subject).value;
+          marks[subject] = value ? parseInt(value) : 0;
+        });
+        return marks;
+      }
+
+      function validateMarks(marks) {
+        for (let subject of subjects) {
+          if (marks[subject] < 0 || marks[subject] > 100) {
+            showError(
+              `Marks for ${
+                subjectNames[subjects.indexOf(subject)]
+              } must be between 0 and 100`
+            );
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function calculateTotal() {
+        const marks = getMarks();
+        if (!validateMarks(marks)) return;
+
+        const total = Object.values(marks).reduce((sum, mark) => sum + mark, 0);
+        document.getElementById("totalValue").textContent = total;
+        document.getElementById("resultsGrid").style.display = "grid";
+        updateProgressBars(marks);
+      }
+
+      function calculateAverage() {
+        const marks = getMarks();
+        if (!validateMarks(marks)) return;
+
+        const total = Object.values(marks).reduce((sum, mark) => sum + mark, 0);
+        const average = total / subjects.length;
+        document.getElementById("averageValue").textContent =
+          average.toFixed(1) + "%";
+        document.getElementById("resultsGrid").style.display = "grid";
+        updateProgressBars(marks);
+      }
+
+      function calculateGrade() {
+        const marks = getMarks();
+        if (!validateMarks(marks)) return;
+
+        const total = Object.values(marks).reduce((sum, mark) => sum + mark, 0);
+        const average = total / subjects.length;
+
+        let grade, subtitle;
+        if (average >= 90) {
+          grade = "A+";
+          subtitle = "Outstanding";
+        } else if (average >= 80) {
+          grade = "A";
+          subtitle = "Excellent";
+        } else if (average >= 70) {
+          grade = "B+";
+          subtitle = "Very Good";
+        } else if (average >= 60) {
+          grade = "B";
+          subtitle = "Good";
+        } else if (average >= 50) {
+          grade = "C+";
+          subtitle = "Satisfactory";
+        } else if (average >= 40) {
+          grade = "C";
+          subtitle = "Pass";
+        } else {
+          grade = "F";
+          subtitle = "Needs Improvement";
+        }
+
+        document.getElementById("gradeValue").textContent = grade;
+        document.getElementById("gradeSubtitle").textContent = subtitle;
+        document.getElementById("resultsGrid").style.display = "grid";
+        updateProgressBars(marks);
+        generateInsights(marks, average);
+      }
+
+      function updateProgressBars(marks) {
+        subjects.forEach((subject, index) => {
+          const progress = marks[subject];
+          const progressElement = document.getElementById(
+            subject.replace("add", "add") + "Progress"
+          );
+          const fillElement = document.getElementById(
+            subject.replace("add", "add") + "Fill"
+          );
+
+          if (progressElement && fillElement) {
+            progressElement.textContent = progress + "%";
+            fillElement.style.width = progress + "%";
+
+            // Color coding based on performance
+            if (progress >= 80) {
+              fillElement.style.background = "#10b981";
+            } else if (progress >= 60) {
+              fillElement.style.background = "#f59e0b";
+            } else {
+              fillElement.style.background = "#ef4444";
+            }
+          }
+        });
+
+        // Update chart
+        updateChart(marks);
+      }
+
+      let performanceChart = null;
+
+      function updateChart(marks) {
+        const ctx = document
+          .getElementById("performanceChart")
+          .getContext("2d");
+
+        // Destroy existing chart if it exists
+        if (performanceChart) {
+          performanceChart.destroy();
+        }
+
+        const labels = subjectNames.slice(0, 5); // Exclude additional subject
+        const data = labels.map((_, index) => marks[subjects[index]] || 0);
+
+        performanceChart = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Performance",
+                data: data,
+                backgroundColor: "rgba(99, 102, 241, 0.2)",
+                borderColor: "rgba(99, 102, 241, 1)",
+                borderWidth: 2,
+                pointBackgroundColor: "rgba(99, 102, 241, 1)",
+                pointBorderColor: "#fff",
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: "rgba(99, 102, 241, 1)",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  stepSize: 20,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      function generateInsights(marks, average) {
+        const insightsContainer = document.getElementById("insightsContainer");
+        insightsContainer.innerHTML = "";
+
+        // Overall performance insight
+        let performanceInsight = "";
+        if (average >= 90) {
+          performanceInsight =
+            "Exceptional performance! You're demonstrating excellent understanding across all subjects.";
+        } else if (average >= 80) {
+          performanceInsight =
+            "Great work! You're performing well above average. Keep up the excellent effort.";
+        } else if (average >= 70) {
+          performanceInsight =
+            "Good performance! You're on the right track. Focus on areas that need improvement.";
+        } else if (average >= 60) {
+          performanceInsight =
+            "Satisfactory performance. Consider spending more time on challenging subjects.";
+        } else {
+          performanceInsight =
+            "You need to focus more on your studies. Consider seeking additional help or tutoring.";
+        }
+
+        addInsight(
+          "Overall Performance",
+          performanceInsight,
+          "fas fa-chart-line"
+        );
+
+        // Subject-specific insights
+        const subjectPerformance = subjects
+          .map((subject, index) => ({
+            name: subjectNames[index],
+            marks: marks[subject],
+          }))
+          .sort((a, b) => b.marks - a.marks);
+
+        const bestSubject = subjectPerformance[0];
+        const worstSubject = subjectPerformance[subjectPerformance.length - 1];
+
+        if (bestSubject.marks > 80) {
+          addInsight(
+            "Strongest Subject",
+            `${bestSubject.name} is your strongest subject with ${bestSubject.marks}% marks.`,
+            "fas fa-trophy"
+          );
+        }
+
+        if (worstSubject.marks < 70) {
+          addInsight(
+            "Area for Improvement",
+            `${worstSubject.name} needs more attention. Consider extra practice and study time.`,
+            "fas fa-exclamation-triangle"
+          );
+        }
+
+        // Study recommendations
+        if (average < 70) {
+          addInsight(
+            "Study Recommendation",
+            "Consider creating a study schedule and seeking help from teachers or tutors for challenging subjects.",
+            "fas fa-calendar-alt"
+          );
+        }
+
+        if (subjectPerformance.filter((s) => s.marks < 60).length > 2) {
+          addInsight(
+            "Multiple Subjects",
+            "You have multiple subjects below 60%. Focus on understanding fundamental concepts first.",
+            "fas fa-book"
+          );
+        }
+      }
+
+      function addInsight(title, message, icon) {
+        const insightsContainer = document.getElementById("insightsContainer");
+        const insightItem = document.createElement("div");
+        insightItem.className = "insight-item";
+        insightItem.innerHTML = `
+                <div class="insight-icon">
+                    <i class="${icon}"></i>
+                </div>
+                <div class="insight-content">
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+        insightsContainer.appendChild(insightItem);
+      }
+
+      function generateReport() {
+        const marks = getMarks();
+        if (!validateMarks(marks)) return;
+
+        const total = Object.values(marks).reduce((sum, mark) => sum + mark, 0);
+        const average = total / subjects.length;
+
+        let report = `STUDENT PERFORMANCE REPORT\n`;
+        report += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
+        report += `SUBJECT MARKS:\n`;
+
+        subjects.forEach((subject, index) => {
+          report += `${subjectNames[index]}: ${marks[subject]}%\n`;
+        });
+
+        report += `\nSUMMARY:\n`;
+        report += `Total Marks: ${total}/600\n`;
+        report += `Average: ${average.toFixed(1)}%\n`;
+
+        // Download report
+        const blob = new Blob([report], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "performance_report.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      // Add input validation
+      subjects.forEach((subject) => {
+        const input = document.getElementById(subject);
+        input.addEventListener("input", function () {
+          const value = parseInt(this.value);
+          if (value < 0) this.value = 0;
+          if (value > 100) this.value = 100;
+        });
+      });
+
+      // Auto-calculate on input change
+      subjects.forEach((subject) => {
+        const input = document.getElementById(subject);
+        input.addEventListener("input", function () {
+          if (this.value) {
+            calculateGrade();
+          }
+        });
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

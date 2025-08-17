@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ask Me Anything - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .question-form {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .form-header h1 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .form-header p {
+        color: var(--text-secondary);
+      }
+
+      .question-input {
+        width: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: var(--transition);
+        background: var(--surface);
+      }
+
+      .question-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .question-input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      .submit-btn {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 1rem;
+        font-size: 1.1rem;
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .result-container {
+        display: none;
+        margin-top: 2rem;
+      }
+
+      .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .result-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .quick-questions {
+        margin-top: 2rem;
+      }
+
+      .quick-questions h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+      }
+
+      .quick-question-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .quick-question {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: left;
+      }
+
+      .quick-question:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.05);
+      }
+
+      .quick-question-icon {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .quick-question-text {
+        font-size: 0.875rem;
+        color: var(--text-primary);
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-top: 1rem;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Header -->
+        <div class="form-header">
+          <h1><i class="fas fa-question-circle"></i> Ask Me Anything</h1>
+          <p>
+            Get instant answers to your academic questions with our AI-powered
+            assistant
+          </p>
+        </div>
+
+        <!-- Question Form -->
+        <div class="question-form">
+          <form id="questionForm">
+            <div class="form-group">
+              <label for="question" class="form-label"
+                >What would you like to know?</label
+              >
+              <textarea
+                id="question"
+                name="question"
+                class="question-input"
+                placeholder="Ask any question about your studies, homework, or academic concepts..."
+                required
+                rows="4"
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary submit-btn"
+              id="submitBtn"
+            >
+              <i class="fas fa-paper-plane"></i> Get Answer
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your question...</p>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer">
+          <div class="card">
+            <div class="result-header">
+              <div class="result-title">
+                <i class="fas fa-robot"></i> AI Answer
+              </div>
+              <div class="result-actions">
+                <button
+                  class="action-btn"
+                  onclick="copyAnswer()"
+                  title="Copy Answer"
+                >
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="askNewQuestion()"
+                  title="Ask New Question"
+                >
+                  <i class="fas fa-plus"></i> New Question
+                </button>
+              </div>
+            </div>
+            <div class="gemini-output" id="answerContent"></div>
+          </div>
+        </div>
+
+        <!-- Quick Questions -->
+        <div class="quick-questions">
+          <h3><i class="fas fa-lightning-bolt"></i> Quick Questions</h3>
+          <div class="quick-question-grid">
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('Explain the water cycle in simple terms')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-tint"></i>
+              </div>
+              <div class="quick-question-text">Explain the water cycle</div>
+            </div>
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('What is photosynthesis and why is it important?')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-seedling"></i>
+              </div>
+              <div class="quick-question-text">What is photosynthesis?</div>
+            </div>
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('How do I solve quadratic equations?')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-square-root-alt"></i>
+              </div>
+              <div class="quick-question-text">Solve quadratic equations</div>
+            </div>
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('Explain Newton\'s three laws of motion')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-atom"></i>
+              </div>
+              <div class="quick-question-text">Newton\'s laws of motion</div>
+            </div>
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('How to write a good essay introduction?')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-pen"></i>
+              </div>
+              <div class="quick-question-text">Essay writing tips</div>
+            </div>
+            <div
+              class="quick-question"
+              onclick="askQuickQuestion('What are the main parts of a cell?')"
+            >
+              <div class="quick-question-icon">
+                <i class="fas fa-microscope"></i>
+              </div>
+              <div class="quick-question-text">Cell structure</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const questionForm = document.getElementById("questionForm");
+      const questionInput = document.getElementById("question");
+      const submitBtn = document.getElementById("submitBtn");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const answerContent = document.getElementById("answerContent");
+      const errorMessage = document.getElementById("errorMessage");
+
+      // Auto-resize textarea
+      questionInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 200) + "px";
+      });
+
+      // Form submission
+      questionForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const question = questionInput.value.trim();
+        if (!question) return;
+
+        // Show loading
+        showLoading();
+        hideError();
+        hideResult();
+
+        try {
+          const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ question: question }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to get answer");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Display result
+          displayAnswer(data.result);
+        } catch (error) {
+          console.error("Error:", error);
+          showError("Sorry, I encountered an error. Please try again.");
+        } finally {
+          hideLoading();
+        }
+      });
+
+      function askQuickQuestion(question) {
+        questionInput.value = question;
+        questionForm.dispatchEvent(new Event("submit"));
+      }
+
+      function displayAnswer(answer) {
+        // Format the AI response
+        const formattedAnswer = formatAIResponse(answer);
+        answerContent.innerHTML = formattedAnswer;
+        resultContainer.style.display = "block";
+
+        // Scroll to result
+        resultContainer.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function formatAIResponse(text) {
+        // Convert markdown-like formatting to HTML
+        let formatted = text
+          // Bold text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          // Italic text
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          // Code blocks
+          .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+          // Inline code
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          // Lists
+          .replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>")
+          // Headers
+          .replace(/^### (.+)$/gm, "<h4>$1</h4>")
+          .replace(/^## (.+)$/gm, "<h3>$1</h3>")
+          .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+          // Line breaks
+          .replace(/\n/g, "<br>");
+
+        // Wrap lists in ul tags
+        formatted = formatted.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
+        return formatted;
+      }
+
+      function copyAnswer() {
+        const text = answerContent.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const copyBtn = document.querySelector(".action-btn");
+          const icon = copyBtn.querySelector("i");
+          const originalText = copyBtn.innerHTML;
+
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+        });
+      }
+
+      function askNewQuestion() {
+        questionInput.value = "";
+        questionInput.style.height = "auto";
+        hideResult();
+        questionInput.focus();
+      }
+
+      function showLoading() {
+        loadingContainer.style.display = "block";
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      }
+
+      function hideLoading() {
+        loadingContainer.style.display = "none";
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Get Answer';
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+      }
+
+      function hideError() {
+        errorMessage.style.display = "none";
+      }
+
+      function hideResult() {
+        resultContainer.style.display = "none";
+      }
+
+      // Focus input on load
+      document.addEventListener("DOMContentLoaded", function () {
+        questionInput.focus();
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

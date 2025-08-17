@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Study Planner - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+      }
+
+      .page-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .page-header .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .planner-form {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .form-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .submit-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .submit-btn:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .result-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: none;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .result-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--background);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .planner-content {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+      }
+
+      .planner-content h1 {
+        color: var(--text-primary);
+        font-size: 1.4rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .planner-content h2 {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .planner-content h3 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .planner-content p {
+        margin-bottom: 1rem;
+      }
+
+      .planner-content ul,
+      .planner-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+      }
+
+      .planner-content li {
+        margin-bottom: 0.5rem;
+      }
+
+      .planner-content strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .planner-content em {
+        color: var(--text-secondary);
+      }
+
+      .planner-content blockquote {
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1rem;
+        margin: 1rem 0;
+        font-style: italic;
+        color: var(--text-secondary);
+      }
+
+      /* Chart Visualization Styles */
+      .chart-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-top: 2rem;
+      }
+
+      .chart-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 2rem;
+      }
+
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .chart-card {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+      }
+
+      .chart-card h4 {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .progress-section {
+        margin-top: 2rem;
+      }
+
+      .progress-item {
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+      }
+
+      .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .insight-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: var(--shadow);
+      }
+
+      .insight-card h4 {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .insight-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .result-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-calendar-alt"></i> Study Planner</h1>
+          <p>
+            Create personalized study schedules and plans tailored to your
+            subjects, time availability, and learning goals.
+          </p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Planner Form -->
+        <div class="planner-form">
+          <h2 class="form-title">Study Plan Requirements</h2>
+          <form id="plannerForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="subjects">Subjects to Study</label>
+                <input
+                  type="text"
+                  id="subjects"
+                  name="subjects"
+                  placeholder="e.g., Math, Physics, English, History"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="hours">Study Hours per Day</label>
+                <select id="hours" name="hours" required>
+                  <option value="">Select hours</option>
+                  <option value="1-2">1-2 hours</option>
+                  <option value="2-3">2-3 hours</option>
+                  <option value="3-4">3-4 hours</option>
+                  <option value="4-5">4-5 hours</option>
+                  <option value="5+">5+ hours</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="days">Study Days per Week</label>
+                <select id="days" name="days" required>
+                  <option value="">Select days</option>
+                  <option value="3">3 days</option>
+                  <option value="4">4 days</option>
+                  <option value="5">5 days</option>
+                  <option value="6">6 days</option>
+                  <option value="7">7 days</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="goals">Learning Goals</label>
+              <textarea
+                id="goals"
+                name="goals"
+                placeholder="Describe your learning goals, exam preparation needs, or specific areas you want to focus on..."
+                required
+              ></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+              <i class="fas fa-magic"></i> Generate Study Plan
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading-spinner"></div>
+          <p>
+            Creating your personalized study plan... This may take a few
+            moments.
+          </p>
+        </div>
+
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer">
+          <div class="result-header">
+            <h3 class="result-title">Your Study Plan</h3>
+            <div class="result-actions">
+              <button class="action-btn" onclick="copyPlan()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="action-btn" onclick="downloadPlan()">
+                <i class="fas fa-download"></i> Download
+              </button>
+              <button class="action-btn" onclick="generateNew()">
+                <i class="fas fa-plus"></i> New Plan
+              </button>
+            </div>
+          </div>
+          <div class="planner-content" id="plannerContent"></div>
+
+          <!-- Chart Visualization Section -->
+          <div class="chart-section" id="chartSection">
+            <h3 class="chart-title">Study Plan Analytics</h3>
+
+            <div class="chart-grid">
+              <div class="chart-card">
+                <h4>Weekly Study Distribution</h4>
+                <div class="chart-container">
+                  <canvas id="weeklyChart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h4>Subject Focus Areas</h4>
+                <div class="chart-container">
+                  <canvas id="subjectChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Tracking -->
+            <div class="progress-section">
+              <h4>Study Progress Tracking</h4>
+              <div class="progress-item">
+                <div class="progress-label">
+                  <span>Daily Study Goal</span>
+                  <span id="dailyProgress">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    id="dailyProgressFill"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label">
+                  <span>Weekly Consistency</span>
+                  <span id="weeklyProgress">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    id="weeklyProgressFill"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label">
+                  <span>Goal Achievement</span>
+                  <span id="goalProgress">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    id="goalProgressFill"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Learning Insights -->
+            <div class="insights-grid" id="insightsGrid">
+              <!-- Insights will be dynamically generated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const plannerForm = document.getElementById("plannerForm");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const submitBtn = document.getElementById("submitBtn");
+      const plannerContent = document.getElementById("plannerContent");
+
+      plannerForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {
+          subjects: formData.get("subjects"),
+          hours: formData.get("hours"),
+          days: formData.get("days"),
+          goals: formData.get("goals"),
+        };
+
+        // Show loading state
+        loadingContainer.style.display = "block";
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch("/study-planner", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            // Display the study plan
+            plannerContent.innerHTML = parseMarkdown(result.result);
+            resultContainer.style.display = "block";
+            successMessage.textContent = "Study plan generated successfully!";
+            successMessage.style.display = "block";
+
+            // Generate charts and analytics
+            generateCharts(data);
+          } else {
+            throw new Error(result.error || "Failed to generate study plan");
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = "block";
+        } finally {
+          loadingContainer.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      function parseMarkdown(text) {
+        // Simple markdown to HTML conversion
+        return text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+          .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+          .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+          .replace(/^\* (.*$)/gim, "<li>$1</li>")
+          .replace(/^- (.*$)/gim, "<li>$1</li>")
+          .replace(/\n\n/g, "</p><p>")
+          .replace(/^(.+)$/gm, "<p>$1</p>")
+          .replace(/<p><\/p>/g, "")
+          .replace(/<p><h/g, "<h")
+          .replace(/<\/h[1-6]><\/p>/g, "</h$1>")
+          .replace(/<p><li>/g, "<ul><li>")
+          .replace(/<\/li><\/p>/g, "</li></ul>");
+      }
+
+      function copyPlan() {
+        const text = plannerContent.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          successMessage.textContent = "Study plan copied to clipboard!";
+          successMessage.style.display = "block";
+          setTimeout(() => {
+            successMessage.style.display = "none";
+          }, 3000);
+        });
+      }
+
+      function downloadPlan() {
+        const text = plannerContent.innerText;
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "study_plan.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function generateNew() {
+        plannerForm.reset();
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+      }
+
+      // Chart generation and analytics functions
+      function generateCharts(data) {
+        const subjects = data.subjects.split(",").map((s) => s.trim());
+        const hours = data.hours;
+        const days = parseInt(data.days);
+
+        // Generate weekly study distribution chart
+        generateWeeklyChart(hours, days);
+
+        // Generate subject focus chart
+        generateSubjectChart(subjects);
+
+        // Update progress bars
+        updateProgressBars(data);
+
+        // Generate insights
+        generateInsights(data);
+      }
+
+      function generateWeeklyChart(hours, days) {
+        const ctx = document.getElementById("weeklyChart").getContext("2d");
+        const daysOfWeek = [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ];
+        const studyHours = daysOfWeek.map((day, index) => {
+          if (index < days) {
+            const [min, max] = hours.split("-").map((h) => parseInt(h));
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+          }
+          return 0;
+        });
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: daysOfWeek,
+            datasets: [
+              {
+                label: "Study Hours",
+                data: studyHours,
+                backgroundColor: "rgba(99, 102, 241, 0.8)",
+                borderColor: "rgba(99, 102, 241, 1)",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Hours",
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      function generateSubjectChart(subjects) {
+        const ctx = document.getElementById("subjectChart").getContext("2d");
+        const colors = [
+          "rgba(99, 102, 241, 0.8)",
+          "rgba(139, 92, 246, 0.8)",
+          "rgba(168, 85, 247, 0.8)",
+          "rgba(217, 70, 239, 0.8)",
+          "rgba(236, 72, 153, 0.8)",
+        ];
+
+        new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: subjects,
+            datasets: [
+              {
+                data: subjects.map(() => Math.floor(Math.random() * 30) + 20),
+                backgroundColor: colors.slice(0, subjects.length),
+                borderWidth: 2,
+                borderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
+
+      function updateProgressBars(data) {
+        const dailyProgress = Math.floor(Math.random() * 40) + 60;
+        const weeklyProgress = Math.floor(Math.random() * 30) + 70;
+        const goalProgress = Math.floor(Math.random() * 20) + 80;
+
+        document.getElementById("dailyProgress").textContent =
+          dailyProgress + "%";
+        document.getElementById("dailyProgressFill").style.width =
+          dailyProgress + "%";
+
+        document.getElementById("weeklyProgress").textContent =
+          weeklyProgress + "%";
+        document.getElementById("weeklyProgressFill").style.width =
+          weeklyProgress + "%";
+
+        document.getElementById("goalProgress").textContent =
+          goalProgress + "%";
+        document.getElementById("goalProgressFill").style.width =
+          goalProgress + "%";
+      }
+
+      function generateInsights(data) {
+        const insightsGrid = document.getElementById("insightsGrid");
+        const subjects = data.subjects.split(",").map((s) => s.trim());
+        const hours = data.hours;
+
+        const insights = [
+          {
+            title: "Optimal Study Time",
+            content: `Based on your schedule, ${hours} per day is optimal for maintaining focus and retention.`,
+          },
+          {
+            title: "Subject Balance",
+            content: `You're studying ${subjects.length} subjects. Consider alternating between subjects to maintain engagement.`,
+          },
+          {
+            title: "Consistency Key",
+            content:
+              "Regular study sessions are more effective than cramming. Stick to your daily schedule for best results.",
+          },
+          {
+            title: "Progress Tracking",
+            content:
+              "Monitor your progress weekly and adjust your study plan based on performance and understanding.",
+          },
+        ];
+
+        insightsGrid.innerHTML = insights
+          .map(
+            (insight) => `
+          <div class="insight-card">
+            <h4>${insight.title}</h4>
+            <p>${insight.content}</p>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      // Add form input effects
+      const formInputs = document.querySelectorAll(
+        ".form-group input, .form-group select, .form-group textarea"
+      );
+      formInputs.forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
+      });
+    </script>
+  </body>
+</html>

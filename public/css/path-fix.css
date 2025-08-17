@@ -1,0 +1,5 @@
+/* CSS file to fix path issues */
+body::after {
+  content: "";
+  display: none;
+}

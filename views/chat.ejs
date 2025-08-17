@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chatbot - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .chat-container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-messages {
+        flex: 1;
+        height: auto;
+      }
+
+      .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        max-width: 70%;
+      }
+
+      .typing-dots {
+        display: flex;
+        gap: 0.25rem;
+      }
+
+      .typing-dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        animation: typing 1.4s infinite ease-in-out;
+      }
+
+      .typing-dots span:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      .typing-dots span:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes typing {
+        0%,
+        80%,
+        100% {
+          transform: scale(0);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .message-time {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        margin-top: 0.25rem;
+      }
+
+      .message-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .message-action {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: var(--transition);
+      }
+
+      .message-action:hover {
+        background: var(--background);
+        color: var(--primary-color);
+      }
+
+      .welcome-message {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+      }
+
+      .welcome-message h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+
+      .quick-action {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+      }
+
+      .quick-action:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="chat-container">
+      <div class="chat-header">
+        <h2><i class="fas fa-robot"></i> AI Learning Assistant</h2>
+        <p>Ask me anything about your studies!</p>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <h3><i class="fas fa-graduation-cap"></i> Welcome to Saarthi AI!</h3>
+          <p>
+            I'm here to help you with your studies. You can ask me questions
+            about any subject, get explanations, or even upload images for
+            problem-solving.
+          </p>
+          <div class="quick-actions">
+            <div
+              class="quick-action"
+              onclick="sendQuickMessage('Explain Newton\'s laws of motion')"
+            >
+              <i class="fas fa-atom"></i> Physics Help
+            </div>
+            <div
+              class="quick-action"
+              onclick="sendQuickMessage('Help me with algebra')"
+            >
+              <i class="fas fa-square-root-alt"></i> Math Help
+            </div>
+            <div
+              class="quick-action"
+              onclick="sendQuickMessage('Explain photosynthesis')"
+            >
+              <i class="fas fa-seedling"></i> Biology Help
+            </div>
+            <div
+              class="quick-action"
+              onclick="sendQuickMessage('Help me write an essay')"
+            >
+              <i class="fas fa-pen"></i> Writing Help
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="message-avatar">AI</div>
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <input
+          type="text"
+          id="userInput"
+          placeholder="Type your question here..."
+          maxlength="500"
+        />
+        <button id="sendBtn" onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const chatMessages = document.getElementById("chatMessages");
+      const userInput = document.getElementById("userInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const typingIndicator = document.getElementById("typingIndicator");
+
+      let isProcessing = false;
+
+      // Auto-resize input
+      userInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 100) + "px";
+      });
+
+      // Send message on Enter
+      userInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Quick message function
+      function sendQuickMessage(message) {
+        userInput.value = message;
+        sendMessage();
+      }
+
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message || isProcessing) return;
+
+        isProcessing = true;
+        sendBtn.disabled = true;
+
+        // Add user message
+        addMessage(message, "user");
+        userInput.value = "";
+        userInput.style.height = "auto";
+
+        // Show typing indicator
+        typingIndicator.style.display = "flex";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: message }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+
+          // Hide typing indicator
+          typingIndicator.style.display = "none";
+
+          // Add AI response with formatted output
+          addFormattedMessage(data.message, "bot");
+        } catch (error) {
+          console.error("Error:", error);
+          typingIndicator.style.display = "none";
+          addMessage("Sorry, I encountered an error. Please try again.", "bot");
+        } finally {
+          isProcessing = false;
+          sendBtn.disabled = false;
+          userInput.focus();
+        }
+      }
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+
+        const time = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        messageDiv.innerHTML = `
+                <div class="message-avatar">${
+                  sender === "user" ? "You" : "AI"
+                }</div>
+                <div class="message-content">
+                    <div class="message-text">${escapeHtml(text)}</div>
+                    <div class="message-time">${time}</div>
+                    <div class="message-actions">
+                        <button class="message-action" onclick="copyMessage(this)" title="Copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        ${
+                          sender === "bot"
+                            ? `<button class="message-action" onclick="likeMessage(this)" title="Like">
+                            <i class="fas fa-thumbs-up"></i>
+                        </button>`
+                            : ""
+                        }
+                    </div>
+                </div>
+            `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addFormattedMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+
+        const time = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        // Format the AI response
+        const formattedText = formatAIResponse(text);
+
+        messageDiv.innerHTML = `
+                <div class="message-avatar">${
+                  sender === "user" ? "You" : "AI"
+                }</div>
+                <div class="message-content">
+                    <div class="message-text">${formattedText}</div>
+                    <div class="message-time">${time}</div>
+                    <div class="message-actions">
+                        <button class="message-action" onclick="copyMessage(this)" title="Copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="message-action" onclick="likeMessage(this)" title="Like">
+                            <i class="fas fa-thumbs-up"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function formatAIResponse(text) {
+        // Convert markdown-like formatting to HTML
+        let formatted = text
+          // Bold text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          // Italic text
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          // Code blocks
+          .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+          // Inline code
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          // Lists
+          .replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>")
+          // Headers
+          .replace(/^### (.+)$/gm, "<h4>$1</h4>")
+          .replace(/^## (.+)$/gm, "<h3>$1</h3>")
+          .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+          // Line breaks
+          .replace(/\n/g, "<br>");
+
+        // Wrap lists in ul tags
+        formatted = formatted.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
+        return formatted;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function copyMessage(button) {
+        const messageText = button
+          .closest(".message-content")
+          .querySelector(".message-text").textContent;
+        navigator.clipboard.writeText(messageText).then(() => {
+          const icon = button.querySelector("i");
+          icon.className = "fas fa-check";
+          setTimeout(() => {
+            icon.className = "fas fa-copy";
+          }, 2000);
+        });
+      }
+
+      function likeMessage(button) {
+        const icon = button.querySelector("i");
+        if (icon.classList.contains("fas-thumbs-up")) {
+          icon.className = "fas fa-thumbs-up text-primary";
+          button.style.color = "var(--primary-color)";
+        } else {
+          icon.className = "fas fa-thumbs-up";
+          button.style.color = "var(--text-secondary)";
+        }
+      }
+
+      // Focus input on load
+      document.addEventListener("DOMContentLoaded", function () {
+        userInput.focus();
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

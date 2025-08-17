@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Analytics - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .search-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .search-form {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .search-input {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .search-btn {
+        padding: 1rem 2rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .search-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .search-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .quick-searches {
+        margin-bottom: 2rem;
+      }
+
+      .quick-searches h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+      }
+
+      .quick-search-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .quick-search-btn {
+        padding: 0.75rem 1rem;
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: left;
+        font-size: 0.875rem;
+      }
+
+      .quick-search-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .loading-container {
+        text-align: center;
+        padding: 2rem;
+        display: none;
+      }
+
+      .results-container {
+        display: none;
+      }
+
+      .result-card {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+      }
+
+      .result-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+      }
+
+      .result-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.5rem;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .result-content {
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .analytics-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .analytics-card {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+      }
+
+      .analytics-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .analytics-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+      }
+
+      .analytics-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .analytics-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .analytics-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 768px) {
+        .search-form {
+          flex-direction: column;
+        }
+
+        .quick-search-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .analytics-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-search"></i> Learning Analytics & Search</h1>
+          <p>
+            Search for educational content, track your learning progress, and
+            get insights to improve your academic performance.
+          </p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Search Container -->
+        <div class="search-container">
+          <div class="search-form">
+            <input
+              type="text"
+              id="searchQuery"
+              class="search-input"
+              placeholder="Search for educational content, topics, or questions..."
+            />
+            <button class="search-btn" id="searchBtn" onclick="performSearch()">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+
+          <div class="quick-searches">
+            <h3>Quick Searches:</h3>
+            <div class="quick-search-grid">
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('mathematics formulas')"
+              >
+                <i class="fas fa-square-root-alt"></i> Math Formulas
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('physics concepts')"
+              >
+                <i class="fas fa-atom"></i> Physics Concepts
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('chemistry reactions')"
+              >
+                <i class="fas fa-flask"></i> Chemistry Reactions
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('biology topics')"
+              >
+                <i class="fas fa-dna"></i> Biology Topics
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('computer programming')"
+              >
+                <i class="fas fa-code"></i> Programming
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('study techniques')"
+              >
+                <i class="fas fa-book"></i> Study Techniques
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('exam preparation')"
+              >
+                <i class="fas fa-graduation-cap"></i> Exam Prep
+              </button>
+              <button
+                class="quick-search-btn"
+                onclick="quickSearch('learning strategies')"
+              >
+                <i class="fas fa-brain"></i> Learning Strategies
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Searching for educational content...</p>
+          </div>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container" id="resultsContainer">
+          <h2 class="section-title">Search Results</h2>
+          <div id="searchResults"></div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics-section">
+          <h2 class="section-title">
+            <i class="fas fa-chart-bar"></i> Learning Analytics
+          </h2>
+
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <div class="analytics-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <div class="analytics-title">Total Searches</div>
+              <div class="analytics-value" id="totalSearches">0</div>
+              <div class="analytics-subtitle">This session</div>
+            </div>
+
+            <div class="analytics-card">
+              <div class="analytics-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="analytics-title">Study Time</div>
+              <div class="analytics-value" id="studyTime">0h</div>
+              <div class="analytics-subtitle">Today</div>
+            </div>
+
+            <div class="analytics-card">
+              <div class="analytics-icon">
+                <i class="fas fa-bookmark"></i>
+              </div>
+              <div class="analytics-title">Saved Content</div>
+              <div class="analytics-value" id="savedContent">0</div>
+              <div class="analytics-subtitle">Bookmarked items</div>
+            </div>
+
+            <div class="analytics-card">
+              <div class="analytics-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="analytics-title">Performance</div>
+              <div class="analytics-value" id="performance">85%</div>
+              <div class="analytics-subtitle">Average score</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let searchCount = 0;
+      let studyTimeMinutes = 0;
+
+      // Initialize analytics
+      document.addEventListener("DOMContentLoaded", function () {
+        updateAnalytics();
+        startStudyTimer();
+      });
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+        setTimeout(() => {
+          errorDiv.style.display = "none";
+        }, 5000);
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.getElementById("successMessage");
+        successDiv.textContent = message;
+        successDiv.style.display = "block";
+        setTimeout(() => {
+          successDiv.style.display = "none";
+        }, 5000);
+      }
+
+      function showLoading() {
+        document.getElementById("loadingContainer").style.display = "block";
+        document.getElementById("resultsContainer").style.display = "none";
+        document.getElementById("searchBtn").disabled = true;
+        document.getElementById("searchBtn").innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Searching...';
+      }
+
+      function hideLoading() {
+        document.getElementById("loadingContainer").style.display = "none";
+        document.getElementById("searchBtn").disabled = false;
+        document.getElementById("searchBtn").innerHTML =
+          '<i class="fas fa-search"></i> Search';
+      }
+
+      function quickSearch(query) {
+        document.getElementById("searchQuery").value = query;
+        performSearch();
+      }
+
+      async function performSearch() {
+        const query = document.getElementById("searchQuery").value.trim();
+
+        if (!query) {
+          showError("Please enter a search query");
+          return;
+        }
+
+        showLoading();
+        searchCount++;
+        updateAnalytics();
+
+        try {
+          const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ question: query }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Search failed");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          displayResults(data.result, query);
+          showSuccess("Search completed successfully!");
+        } catch (error) {
+          console.error("Search error:", error);
+          showError(
+            "Sorry, I encountered an error while searching. Please try again."
+          );
+        } finally {
+          hideLoading();
+        }
+      }
+
+      function displayResults(result, query) {
+        const resultsContainer = document.getElementById("resultsContainer");
+        const searchResults = document.getElementById("searchResults");
+
+        // Format the AI response
+        const formattedResult = formatAIResponse(result);
+
+        searchResults.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-search"></i> Results for: "${query}"
+                        </div>
+                        <div class="result-actions">
+                            <button class="action-btn" onclick="copyResult()" title="Copy Result">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="action-btn" onclick="saveResult()" title="Save Result">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                            <button class="action-btn" onclick="shareResult()" title="Share Result">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="result-content gemini-output">
+                        ${formattedResult}
+                    </div>
+                </div>
+            `;
+
+        resultsContainer.style.display = "block";
+        resultsContainer.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function formatAIResponse(text) {
+        // Convert markdown-like formatting to HTML
+        let formatted = text
+          // Bold text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          // Italic text
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          // Code blocks
+          .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+          // Inline code
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          // Lists
+          .replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>")
+          // Headers
+          .replace(/^### (.+)$/gm, "<h4>$1</h4>")
+          .replace(/^## (.+)$/gm, "<h3>$1</h3>")
+          .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+          // Line breaks
+          .replace(/\n/g, "<br>");
+
+        // Wrap lists in ul tags
+        formatted = formatted.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
+        return formatted;
+      }
+
+      function copyResult() {
+        const resultText =
+          document.querySelector(".result-content").textContent;
+        navigator.clipboard.writeText(resultText).then(() => {
+          showSuccess("Result copied to clipboard!");
+        });
+      }
+
+      function saveResult() {
+        const savedContent =
+          parseInt(document.getElementById("savedContent").textContent) + 1;
+        document.getElementById("savedContent").textContent = savedContent;
+        showSuccess("Result saved to bookmarks!");
+      }
+
+      function shareResult() {
+        if (navigator.share) {
+          navigator.share({
+            title: "Educational Search Result",
+            text: document.querySelector(".result-content").textContent,
+            url: window.location.href,
+          });
+        } else {
+          copyResult();
+        }
+      }
+
+      function updateAnalytics() {
+        document.getElementById("totalSearches").textContent = searchCount;
+
+        const hours = Math.floor(studyTimeMinutes / 60);
+        const minutes = studyTimeMinutes % 60;
+        document.getElementById(
+          "studyTime"
+        ).textContent = `${hours}h ${minutes}m`;
+      }
+
+      function startStudyTimer() {
+        setInterval(() => {
+          studyTimeMinutes++;
+          updateAnalytics();
+        }, 60000); // Update every minute
+      }
+
+      // Enter key to search
+      document
+        .getElementById("searchQuery")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            performSearch();
+          }
+        });
+
+      // Auto-focus search input
+      document.getElementById("searchQuery").focus();
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

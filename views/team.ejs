@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Our Team - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+      }
+
+      .page-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .page-header .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .team-section {
+        padding: 4rem 0;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .section-title h2 {
+        color: var(--text-primary);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .section-title p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+      }
+
+      .team-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .team-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .team-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .team-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .team-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .team-avatar::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        opacity: 0.9;
+      }
+
+      .team-avatar i {
+        position: relative;
+        z-index: 1;
+      }
+
+      .team-info h3 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .team-role {
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-bottom: 1rem;
+      }
+
+      .team-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+
+      .team-skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .skill-tag {
+        background: var(--background);
+        color: var(--text-primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .team-social {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .social-link {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--background);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .social-link:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .stats-section {
+        background: var(--surface);
+        padding: 4rem 0;
+        margin-top: 4rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 768px) {
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .team-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-users"></i> Our Team</h1>
+          <p>
+            Meet the passionate educators and innovators behind Saarthi's
+            AI-powered learning platform.
+          </p>
+        </div>
+
+        <!-- Team Section -->
+        <section class="team-section">
+          <div class="section-title">
+            <h2>Expert Educators & Innovators</h2>
+            <p>
+              Our team combines decades of educational experience with
+              cutting-edge AI technology to create the future of learning.
+            </p>
+          </div>
+
+          <div class="team-grid">
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-user-graduate"></i>
+              </div>
+              <div class="team-info">
+                <h3>Dr. Sarah Johnson</h3>
+                <div class="team-role">Chief Education Officer</div>
+                <p class="team-description">
+                  Former university professor with 15+ years in educational
+                  technology. Passionate about making quality education
+                  accessible to all students.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">Education</span>
+                  <span class="skill-tag">AI Integration</span>
+                  <span class="skill-tag">Curriculum Design</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-laptop-code"></i>
+              </div>
+              <div class="team-info">
+                <h3>Michael Chen</h3>
+                <div class="team-role">Lead AI Engineer</div>
+                <p class="team-description">
+                  AI specialist with expertise in natural language processing
+                  and machine learning. Dedicated to creating intelligent
+                  educational tools.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">Machine Learning</span>
+                  <span class="skill-tag">NLP</span>
+                  <span class="skill-tag">Python</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-github"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-chalkboard-teacher"></i>
+              </div>
+              <div class="team-info">
+                <h3>Emily Rodriguez</h3>
+                <div class="team-role">Senior Curriculum Developer</div>
+                <p class="team-description">
+                  Experienced teacher and curriculum specialist. Focuses on
+                  creating engaging, standards-aligned educational content.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">Curriculum Design</span>
+                  <span class="skill-tag">Assessment</span>
+                  <span class="skill-tag">Student Engagement</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-mobile-alt"></i>
+              </div>
+              <div class="team-info">
+                <h3>David Kim</h3>
+                <div class="team-role">UX/UI Designer</div>
+                <p class="team-description">
+                  Creative designer focused on creating intuitive, accessible
+                  user experiences that enhance the learning journey.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">UX Design</span>
+                  <span class="skill-tag">UI Design</span>
+                  <span class="skill-tag">Accessibility</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-dribbble"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="team-info">
+                <h3>Lisa Thompson</h3>
+                <div class="team-role">Data Analyst</div>
+                <p class="team-description">
+                  Data scientist specializing in educational analytics. Helps
+                  students and teachers understand learning patterns and
+                  progress.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">Data Analysis</span>
+                  <span class="skill-tag">Learning Analytics</span>
+                  <span class="skill-tag">Statistics</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <div class="team-avatar">
+                <i class="fas fa-headset"></i>
+              </div>
+              <div class="team-info">
+                <h3>Alex Morgan</h3>
+                <div class="team-role">Student Success Manager</div>
+                <p class="team-description">
+                  Dedicated to ensuring every student has the support they need
+                  to succeed. Provides personalized guidance and assistance.
+                </p>
+                <div class="team-skills">
+                  <span class="skill-tag">Student Support</span>
+                  <span class="skill-tag">Mentoring</span>
+                  <span class="skill-tag">Communication</span>
+                </div>
+                <div class="team-social">
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                  <a href="#" class="social-link"
+                    ><i class="fas fa-envelope"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+          <div class="container">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Years Combined Experience</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Students Helped</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Schools Partnered</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">99%</div>
+                <div class="stat-label">Satisfaction Rate</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // Add smooth animations
+      document.addEventListener("DOMContentLoaded", function () {
+        // Animate team cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        });
+
+        const teamCards = document.querySelectorAll(".team-card");
+        teamCards.forEach((card) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(30px)";
+          card.style.transition = "all 0.6s ease-out";
+          observer.observe(card);
+        });
+
+        // Animate stats on scroll
+        const statNumbers = document.querySelectorAll(".stat-number");
+        statNumbers.forEach((stat) => {
+          const finalNumber = parseInt(stat.textContent);
+          let currentNumber = 0;
+          const increment = finalNumber / 50;
+
+          const updateNumber = () => {
+            if (currentNumber < finalNumber) {
+              currentNumber += increment;
+              stat.textContent =
+                Math.floor(currentNumber) +
+                (stat.textContent.includes("+") ? "+" : "") +
+                (stat.textContent.includes("%") ? "%" : "");
+              requestAnimationFrame(updateNumber);
+            } else {
+              stat.textContent =
+                stat.textContent.replace(/\+$/, "") +
+                (stat.textContent.includes("+") ? "+" : "") +
+                (stat.textContent.includes("%") ? "%" : "");
+            }
+          };
+
+          const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                updateNumber();
+                statObserver.unobserve(entry.target);
+              }
+            });
+          });
+
+          statObserver.observe(stat);
+        });
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

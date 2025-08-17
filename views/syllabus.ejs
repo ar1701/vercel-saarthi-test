@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Syllabus Generator - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .syllabus-form {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .form-header h1 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .form-header p {
+        color: var(--text-secondary);
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .form-select,
+      .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--surface);
+      }
+
+      .form-select:focus,
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .generate-btn {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .generate-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .result-container {
+        display: none;
+        margin-top: 2rem;
+      }
+
+      .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .result-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-top: 1rem;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-top: 1rem;
+        display: none;
+      }
+
+      .subject-suggestions {
+        margin-top: 2rem;
+      }
+
+      .suggestions-title {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .suggestions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .suggestion-chip {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+        font-size: 0.875rem;
+      }
+
+      .suggestion-chip:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .suggestions-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Header -->
+        <div class="form-header">
+          <h1><i class="fas fa-graduation-cap"></i> Syllabus Generator</h1>
+          <p>
+            Generate comprehensive syllabi for any grade and subject based on
+            current educational standards
+          </p>
+        </div>
+
+        <!-- Syllabus Form -->
+        <div class="syllabus-form">
+          <form id="syllabusForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Class/Grade</label>
+                <select id="class" name="std" class="form-select" required>
+                  <option value="" disabled selected>Select Class</option>
+                  <option value="1">Class 1</option>
+                  <option value="2">Class 2</option>
+                  <option value="3">Class 3</option>
+                  <option value="4">Class 4</option>
+                  <option value="5">Class 5</option>
+                  <option value="6">Class 6</option>
+                  <option value="7">Class 7</option>
+                  <option value="8">Class 8</option>
+                  <option value="9">Class 9</option>
+                  <option value="10">Class 10</option>
+                  <option value="11">Class 11</option>
+                  <option value="12">Class 12</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <input
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  class="form-input"
+                  required
+                  placeholder="Enter subject name"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generateBtn">
+              <i class="fas fa-magic"></i> Generate Syllabus
+            </button>
+          </form>
+
+          <!-- Subject Suggestions -->
+          <div class="subject-suggestions">
+            <div class="suggestions-title">Popular Subjects:</div>
+            <div class="suggestions-grid">
+              <div
+                class="suggestion-chip"
+                onclick="selectSubject('Mathematics')"
+              >
+                Mathematics
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Science')">
+                Science
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('English')">
+                English
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Hindi')">
+                Hindi
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="selectSubject('Social Studies')"
+              >
+                Social Studies
+              </div>
+              <div
+                class="suggestion-chip"
+                onclick="selectSubject('Computer Science')"
+              >
+                Computer Science
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Physics')">
+                Physics
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Chemistry')">
+                Chemistry
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Biology')">
+                Biology
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('History')">
+                History
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Geography')">
+                Geography
+              </div>
+              <div class="suggestion-chip" onclick="selectSubject('Economics')">
+                Economics
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Generating your syllabus...</p>
+          </div>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Result Container -->
+        <div class="result-container" id="resultContainer">
+          <div class="card">
+            <div class="result-header">
+              <div class="result-title">
+                <i class="fas fa-book"></i> Generated Syllabus
+              </div>
+              <div class="result-actions">
+                <button
+                  class="action-btn"
+                  onclick="copySyllabus()"
+                  title="Copy Syllabus"
+                >
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="downloadSyllabus()"
+                  title="Download as PDF"
+                >
+                  <i class="fas fa-download"></i> Download
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="generateNew()"
+                  title="Generate New"
+                >
+                  <i class="fas fa-plus"></i> New
+                </button>
+              </div>
+            </div>
+            <div class="gemini-output" id="syllabusContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const syllabusForm = document.getElementById("syllabusForm");
+      const generateBtn = document.getElementById("generateBtn");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const resultContainer = document.getElementById("resultContainer");
+      const syllabusContent = document.getElementById("syllabusContent");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+
+      // Show loading state
+      function showLoading() {
+        loadingContainer.style.display = "block";
+        generateBtn.disabled = true;
+        generateBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Generating...';
+      }
+
+      function hideLoading() {
+        loadingContainer.style.display = "none";
+        generateBtn.disabled = false;
+        generateBtn.innerHTML =
+          '<i class="fas fa-magic"></i> Generate Syllabus';
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+        successMessage.style.display = "none";
+      }
+
+      function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.style.display = "block";
+        errorMessage.style.display = "none";
+      }
+
+      function hideMessages() {
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+      }
+
+      function selectSubject(subject) {
+        document.getElementById("subject").value = subject;
+      }
+
+      // Form submission
+      syllabusForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(syllabusForm);
+        const std = formData.get("std");
+        const subject = formData.get("subject");
+
+        if (!std || !subject) {
+          showError("Please fill in all fields");
+          return;
+        }
+
+        showLoading();
+        hideMessages();
+        hideResult();
+
+        try {
+          const response = await fetch("/syllabus", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ std: std, subject: subject }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to generate syllabus");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Display result
+          displaySyllabus(data.result);
+          showSuccess("Syllabus generated successfully!");
+        } catch (error) {
+          console.error("Error:", error);
+          showError("Sorry, I encountered an error. Please try again.");
+        } finally {
+          hideLoading();
+        }
+      });
+
+      function displaySyllabus(syllabus) {
+        // Format the AI response
+        const formattedSyllabus = formatAIResponse(syllabus);
+        syllabusContent.innerHTML = formattedSyllabus;
+        resultContainer.style.display = "block";
+
+        // Scroll to result
+        resultContainer.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function formatAIResponse(text) {
+        // Convert markdown-like formatting to HTML
+        let formatted = text
+          // Bold text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          // Italic text
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          // Code blocks
+          .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+          // Inline code
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          // Lists
+          .replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>")
+          // Headers
+          .replace(/^### (.+)$/gm, "<h4>$1</h4>")
+          .replace(/^## (.+)$/gm, "<h3>$1</h3>")
+          .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+          // Line breaks
+          .replace(/\n/g, "<br>");
+
+        // Wrap lists in ul tags
+        formatted = formatted.replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>");
+
+        return formatted;
+      }
+
+      function copySyllabus() {
+        const text = syllabusContent.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const copyBtn = document.querySelector(".action-btn");
+          const originalText = copyBtn.innerHTML;
+
+          copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2000);
+        });
+      }
+
+      function downloadSyllabus() {
+        const text = syllabusContent.textContent;
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "syllabus.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function generateNew() {
+        syllabusForm.reset();
+        hideResult();
+        hideMessages();
+      }
+
+      function hideResult() {
+        resultContainer.style.display = "none";
+      }
+
+      // Focus input on load
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("class").focus();
+      });
+    </script>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+  </body>
+</html>

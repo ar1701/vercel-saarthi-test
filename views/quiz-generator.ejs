@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Generator - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .page-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--background), #f1f5f9);
+        padding: 2rem 0;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .page-header h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .page-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .quiz-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        position: relative;
+      }
+
+      .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .form-input,
+      .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--background);
+      }
+
+      .form-input:focus,
+      .form-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text-primary);
+        border: 2px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--background);
+        transform: translateY(-2px);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Quiz Interface */
+      .quiz-interface {
+        display: none;
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .quiz-info h3 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .quiz-info p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .quiz-timer {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .question-container {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--background);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+
+      .question-number {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .question-text {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .option-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        background: var(--surface);
+      }
+
+      .option-item:hover {
+        border-color: var(--primary-color);
+        background: var(--background);
+      }
+
+      .option-item.selected {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+      }
+
+      .option-radio {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+      }
+
+      .option-item.selected .option-radio {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+      }
+
+      .option-item.selected .option-radio::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+      }
+
+      .option-text {
+        color: var(--text-primary);
+        font-size: 1rem;
+        flex: 1;
+      }
+
+      .quiz-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .question-indicators {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .question-indicator {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .question-indicator.answered {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .question-indicator.current {
+        background: var(--background);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+
+      /* Results Interface */
+      .results-interface {
+        display: none;
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+
+      .results-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .score-display {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .score-label {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .result-card {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+      }
+
+      .result-card h4 {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1rem;
+      }
+
+      .progress-section {
+        margin-top: 2rem;
+      }
+
+      .progress-item {
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+      }
+
+      .question-review {
+        margin-top: 2rem;
+      }
+
+      .review-item {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+      }
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .review-question {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .review-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .review-status.correct {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .review-status.incorrect {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .review-options {
+        margin-bottom: 1rem;
+      }
+
+      .review-option {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+      }
+
+      .review-option.user-answer {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .review-option.correct-answer {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .review-explanation {
+        background: var(--surface);
+        padding: 1rem;
+        border-radius: var(--radius);
+        border-left: 4px solid var(--primary-color);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .message {
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .message.success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .message.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .suggestions {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: var(--background);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+
+      .suggestions h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+      }
+
+      .suggestion-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .suggestion-tag {
+        padding: 0.5rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.9rem;
+      }
+
+      .suggestion-tag:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+          flex-direction: column;
+        }
+
+        .quiz-header {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .quiz-navigation {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .question-indicators {
+          justify-content: center;
+        }
+
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('navbar') %>
+
+    <div class="page-container">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>
+            <i class="fas fa-question-circle"></i>
+            Quiz Generator
+          </h1>
+          <p>
+            Generate customized quizzes on any topic with different difficulty
+            levels and question types. Perfect for test preparation and
+            self-assessment.
+          </p>
+        </div>
+
+        <!-- Quiz Generator Form -->
+        <div class="quiz-container" id="quizFormContainer">
+          <h2 class="section-title">
+            <i class="fas fa-cog"></i>
+            Quiz Configuration
+          </h2>
+
+          <form id="quizForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="topic" class="form-label">Topic</label>
+                <input
+                  type="text"
+                  id="topic"
+                  name="topic"
+                  class="form-input"
+                  placeholder="e.g., Mathematics, History, Science"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="difficulty" class="form-label"
+                  >Difficulty Level</label
+                >
+                <select
+                  id="difficulty"
+                  name="difficulty"
+                  class="form-select"
+                  required
+                >
+                  <option value="">Select Difficulty</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="type" class="form-label">Question Type</label>
+                <select id="type" name="type" class="form-select" required>
+                  <option value="">Select Type</option>
+                  <option value="MCQ">Multiple Choice Questions</option>
+                  <option value="Subjective">Subjective Questions</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="count" class="form-label"
+                  >Number of Questions</label
+                >
+                <select id="count" name="count" class="form-select" required>
+                  <option value="">Select Count</option>
+                  <option value="5">5 Questions</option>
+                  <option value="10">10 Questions</option>
+                  <option value="15">15 Questions</option>
+                  <option value="20">20 Questions</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="submitBtn" class="btn btn-primary">
+                <i class="fas fa-magic"></i>
+                Generate Quiz
+              </button>
+              <button
+                type="button"
+                onclick="resetForm()"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-redo"></i>
+                Reset
+              </button>
+            </div>
+          </form>
+
+          <!-- Loading State -->
+          <div id="loadingContainer" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Generating your quiz... This may take a few moments.</p>
+          </div>
+
+          <!-- Messages -->
+          <div id="errorMessage" class="message error"></div>
+          <div id="successMessage" class="message success"></div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quizInterface" class="quiz-interface">
+          <div class="quiz-header">
+            <div class="quiz-info">
+              <h3 id="quizTopic">Quiz Topic</h3>
+              <p id="quizDetails">Difficulty • Type • Questions</p>
+            </div>
+            <div class="quiz-timer" id="quizTimer">Time: 00:00</div>
+          </div>
+
+          <div id="questionContainer" class="question-container">
+            <!-- Questions will be loaded here -->
+          </div>
+
+          <div class="quiz-navigation">
+            <div class="question-indicators" id="questionIndicators">
+              <!-- Question indicators will be generated here -->
+            </div>
+            <div class="form-actions">
+              <button
+                onclick="previousQuestion()"
+                class="btn btn-secondary"
+                id="prevBtn"
+              >
+                <i class="fas fa-chevron-left"></i>
+                Previous
+              </button>
+              <button
+                onclick="nextQuestion()"
+                class="btn btn-primary"
+                id="nextBtn"
+              >
+                Next
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <button
+                onclick="submitQuiz()"
+                class="btn btn-primary"
+                id="submitQuizBtn"
+                style="display: none"
+              >
+                <i class="fas fa-check"></i>
+                Submit Quiz
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Interface -->
+        <div id="resultsInterface" class="results-interface">
+          <div class="results-header">
+            <div class="score-display" id="scoreDisplay">0%</div>
+            <div class="score-label" id="scoreLabel">Your Score</div>
+          </div>
+
+          <div class="results-grid">
+            <div class="result-card">
+              <h4>Performance Overview</h4>
+              <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+              </div>
+            </div>
+
+            <div class="result-card">
+              <h4>Question Analysis</h4>
+              <div class="progress-section">
+                <div class="progress-item">
+                  <div class="progress-label">
+                    <span>Correct Answers</span>
+                    <span id="correctAnswers">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      id="correctProgress"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-label">
+                    <span>Incorrect Answers</span>
+                    <span id="incorrectAnswers">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      id="incorrectProgress"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-label">
+                    <span>Time Taken</span>
+                    <span id="timeTaken">0:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="question-review" id="questionReview">
+            <!-- Question review will be generated here -->
+          </div>
+
+          <div class="form-actions">
+            <button onclick="generateNewQuiz()" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              New Quiz
+            </button>
+            <button onclick="viewHistory()" class="btn btn-secondary">
+              <i class="fas fa-history"></i>
+              View History
+            </button>
+          </div>
+        </div>
+
+        <!-- Topic Suggestions -->
+        <div class="suggestions">
+          <h3>Popular Quiz Topics</h3>
+          <div class="suggestion-tags">
+            <span class="suggestion-tag" onclick="setTopic('Mathematics')"
+              >Mathematics</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Physics')"
+              >Physics</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Chemistry')"
+              >Chemistry</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Biology')"
+              >Biology</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('History')"
+              >History</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Geography')"
+              >Geography</span
+            >
+            <span
+              class="suggestion-tag"
+              onclick="setTopic('English Literature')"
+              >English Literature</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Computer Science')"
+              >Computer Science</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Economics')"
+              >Economics</span
+            >
+            <span class="suggestion-tag" onclick="setTopic('Psychology')"
+              >Psychology</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Footer -->
+    <%- include('footer') %>
+
+    <script>
+      let currentQuiz = null;
+      let currentQuestionIndex = 0;
+      let userAnswers = [];
+      let startTime = null;
+      let timerInterval = null;
+      let quizData = null;
+
+      const quizForm = document.getElementById("quizForm");
+      const loadingContainer = document.getElementById("loadingContainer");
+      const quizInterface = document.getElementById("quizInterface");
+      const resultsInterface = document.getElementById("resultsInterface");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const submitBtn = document.getElementById("submitBtn");
+
+      quizForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {
+          topic: formData.get("topic"),
+          difficulty: formData.get("difficulty"),
+          type: formData.get("type"),
+          count: formData.get("count"),
+        };
+
+        // Show loading state
+        loadingContainer.style.display = "block";
+        quizInterface.style.display = "none";
+        resultsInterface.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch("/quiz-generator", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            if (result.quiz && result.quiz.questions) {
+              // JSON format quiz
+              quizData = result;
+              initializeQuiz(result.quiz.questions, data);
+            } else {
+              // Fallback to text format
+              throw new Error(
+                "Failed to generate structured quiz. Please try again."
+              );
+            }
+          } else {
+            throw new Error(result.error || "Failed to generate quiz");
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = "block";
+        } finally {
+          loadingContainer.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      function initializeQuiz(questions, config) {
+        currentQuiz = questions;
+        currentQuestionIndex = 0;
+        userAnswers = new Array(questions.length).fill(null);
+        startTime = Date.now();
+
+        // Update quiz info
+        document.getElementById("quizTopic").textContent = config.topic;
+        document.getElementById(
+          "quizDetails"
+        ).textContent = `${config.difficulty} • ${config.type} • ${config.count} Questions`;
+
+        // Generate question indicators
+        generateQuestionIndicators(questions.length);
+
+        // Show first question
+        showQuestion(0);
+
+        // Start timer
+        startTimer();
+
+        // Show quiz interface
+        quizInterface.style.display = "block";
+      }
+
+      function generateQuestionIndicators(count) {
+        const indicators = document.getElementById("questionIndicators");
+        indicators.innerHTML = "";
+
+        for (let i = 0; i < count; i++) {
+          const indicator = document.createElement("div");
+          indicator.className = "question-indicator";
+          indicator.textContent = i + 1;
+          indicator.onclick = () => showQuestion(i);
+          indicators.appendChild(indicator);
+        }
+      }
+
+      function showQuestion(index) {
+        if (!currentQuiz || index < 0 || index >= currentQuiz.length) return;
+
+        currentQuestionIndex = index;
+        const question = currentQuiz[index];
+
+        const container = document.getElementById("questionContainer");
+        container.innerHTML = `
+          <div class="question-number">Question ${index + 1} of ${
+          currentQuiz.length
+        }</div>
+          <div class="question-text">${question.question}</div>
+          <div class="options-container">
+            ${question.options
+              .map(
+                (option, optionIndex) => `
+              <div class="option-item ${
+                userAnswers[index] === option.charAt(0) ? "selected" : ""
+              }" 
+                   onclick="selectOption('${option.charAt(0)}')">
+                <div class="option-radio"></div>
+                <div class="option-text">${option}</div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+
+        // Update indicators
+        updateQuestionIndicators();
+
+        // Update navigation buttons
+        updateNavigationButtons();
+      }
+
+      function selectOption(option) {
+        userAnswers[currentQuestionIndex] = option;
+
+        // Update UI
+        const optionItems = document.querySelectorAll(".option-item");
+        optionItems.forEach((item) => item.classList.remove("selected"));
+        event.target.closest(".option-item").classList.add("selected");
+
+        // Update indicators
+        updateQuestionIndicators();
+      }
+
+      function updateQuestionIndicators() {
+        const indicators = document.querySelectorAll(".question-indicator");
+        indicators.forEach((indicator, index) => {
+          indicator.classList.remove("current", "answered");
+          if (index === currentQuestionIndex) {
+            indicator.classList.add("current");
+          } else if (userAnswers[index] !== null) {
+            indicator.classList.add("answered");
+          }
+        });
+      }
+
+      function updateNavigationButtons() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const submitBtn = document.getElementById("submitQuizBtn");
+
+        prevBtn.disabled = currentQuestionIndex === 0;
+        nextBtn.style.display =
+          currentQuestionIndex === currentQuiz.length - 1
+            ? "none"
+            : "inline-flex";
+        submitBtn.style.display =
+          currentQuestionIndex === currentQuiz.length - 1
+            ? "inline-flex"
+            : "none";
+      }
+
+      function previousQuestion() {
+        if (currentQuestionIndex > 0) {
+          showQuestion(currentQuestionIndex - 1);
+        }
+      }
+
+      function nextQuestion() {
+        if (currentQuestionIndex < currentQuiz.length - 1) {
+          showQuestion(currentQuestionIndex + 1);
+        }
+      }
+
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          const minutes = Math.floor(elapsed / 60);
+          const seconds = elapsed % 60;
+          document.getElementById("quizTimer").textContent = `Time: ${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+      }
+
+      async function submitQuiz() {
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        stopTimer();
+
+        // Prepare answers for submission
+        const answers = currentQuiz.map((question, index) => ({
+          userAnswer: userAnswers[index] || "",
+          correctAnswer: question.correctAnswer,
+        }));
+
+        try {
+          const response = await fetch("/submit-quiz", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              topic: quizData.topic,
+              difficulty: quizData.difficulty,
+              type: quizData.type,
+              count: quizData.count,
+              answers,
+              timeTaken,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showResults(result, timeTaken);
+          } else {
+            throw new Error(result.error || "Failed to submit quiz");
+          }
+        } catch (error) {
+          errorMessage.textContent = error.message;
+          errorMessage.style.display = "block";
+        }
+      }
+
+      function showResults(result, timeTaken) {
+        // Hide quiz interface
+        quizInterface.style.display = "none";
+
+        // Update score display
+        document.getElementById(
+          "scoreDisplay"
+        ).textContent = `${result.score}%`;
+        document.getElementById(
+          "scoreLabel"
+        ).textContent = `You got ${result.correctAnswers} out of ${result.totalQuestions} questions correct`;
+
+        // Update progress bars
+        const correctPercentage =
+          (result.correctAnswers / result.totalQuestions) * 100;
+        const incorrectPercentage =
+          ((result.totalQuestions - result.correctAnswers) /
+            result.totalQuestions) *
+          100;
+
+        document.getElementById("correctAnswers").textContent =
+          result.correctAnswers;
+        document.getElementById("incorrectAnswers").textContent =
+          result.totalQuestions - result.correctAnswers;
+        document.getElementById("timeTaken").textContent =
+          formatTime(timeTaken);
+
+        document.getElementById(
+          "correctProgress"
+        ).style.width = `${correctPercentage}%`;
+        document.getElementById(
+          "incorrectProgress"
+        ).style.width = `${incorrectPercentage}%`;
+
+        // Generate performance chart
+        generatePerformanceChart(result);
+
+        // Generate question review
+        generateQuestionReview(result.userAnswers);
+
+        // Show results interface
+        resultsInterface.style.display = "block";
+      }
+
+      function generatePerformanceChart(result) {
+        const ctx = document
+          .getElementById("performanceChart")
+          .getContext("2d");
+
+        new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Correct", "Incorrect"],
+            datasets: [
+              {
+                data: [
+                  result.correctAnswers,
+                  result.totalQuestions - result.correctAnswers,
+                ],
+                backgroundColor: ["#10b981", "#ef4444"],
+                borderWidth: 2,
+                borderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
+
+      function generateQuestionReview(userAnswers) {
+        const reviewContainer = document.getElementById("questionReview");
+        reviewContainer.innerHTML = "<h3>Question Review</h3>";
+
+        userAnswers.forEach((answer, index) => {
+          const question = currentQuiz[index];
+          const isCorrect = answer.isCorrect;
+
+          const reviewItem = document.createElement("div");
+          reviewItem.className = "review-item";
+          reviewItem.innerHTML = `
+            <div class="review-header">
+              <div class="review-question">Question ${index + 1}</div>
+              <div class="review-status ${isCorrect ? "correct" : "incorrect"}">
+                ${isCorrect ? "Correct" : "Incorrect"}
+              </div>
+            </div>
+            <div class="question-text">${question.question}</div>
+            <div class="review-options">
+              ${question.options
+                .map((option) => {
+                  const optionLetter = option.charAt(0);
+                  let className = "review-option";
+                  if (optionLetter === answer.userAnswer) {
+                    className += " user-answer";
+                  }
+                  if (optionLetter === answer.correctAnswer) {
+                    className += " correct-answer";
+                  }
+                  return `<div class="${className}">${option}</div>`;
+                })
+                .join("")}
+            </div>
+            <div class="review-explanation">
+              <strong>Explanation:</strong> ${question.explanation}
+            </div>
+          `;
+
+          reviewContainer.appendChild(reviewItem);
+        });
+      }
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+      }
+
+      function generateNewQuiz() {
+        quizInterface.style.display = "none";
+        resultsInterface.style.display = "none";
+        document.getElementById("quizFormContainer").style.display = "block";
+        resetForm();
+      }
+
+      function viewHistory() {
+        // TODO: Implement quiz history view
+        alert("Quiz history feature coming soon!");
+      }
+
+      function resetForm() {
+        quizForm.reset();
+        quizInterface.style.display = "none";
+        resultsInterface.style.display = "none";
+        errorMessage.style.display = "none";
+        successMessage.style.display = "none";
+        stopTimer();
+      }
+
+      function setTopic(topic) {
+        document.getElementById("topic").value = topic;
+      }
+
+      // Add form input effects
+      const formInputs = document.querySelectorAll(
+        ".form-group input, .form-group select"
+      );
+      formInputs.forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "translateY(-2px)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "translateY(0)";
+        });
+      });
+    </script>
+  </body>
+</html>

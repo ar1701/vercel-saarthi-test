@@ -1,0 +1,229 @@
+<!-- Modern Navbar Component -->
+<nav class="modern-navbar">
+  <div class="navbar-container">
+    <a href="/index" class="navbar-brand">
+      <i class="fas fa-graduation-cap"></i>
+      Saarthi
+    </a>
+
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <ul class="navbar-menu" id="navbarMenu">
+      <li>
+        <a
+          href="/index"
+          class="<%= typeof currentPage !== 'undefined' && currentPage === 'home' ? 'active' : '' %>"
+          >Home</a
+        >
+      </li>
+      <li>
+        <a
+          href="/about"
+          class="<%= typeof currentPage !== 'undefined' && currentPage === 'about' ? 'active' : '' %>"
+          >About</a
+        >
+      </li>
+      <li>
+        <a
+          href="/grading"
+          class="<%= typeof currentPage !== 'undefined' && currentPage === 'grading' ? 'active' : '' %>"
+          >Grade Calculator</a
+        >
+      </li>
+      <li>
+        <a
+          href="/courses"
+          class="<%= typeof currentPage !== 'undefined' && currentPage === 'courses' ? 'active' : '' %>"
+          >AI Services</a
+        >
+      </li>
+      <li class="navbar-dropdown">
+        <a href="#">Pages <i class="fas fa-chevron-down"></i></a>
+        <div class="dropdown-menu">
+          <a href="/team">Our Team</a>
+          <a href="/testimonial">Testimonials</a>
+          <a href="/quiz-generator">Quiz Generator</a>
+        </div>
+      </li>
+      <li>
+        <a
+          href="/contact"
+          class="<%= typeof currentPage !== 'undefined' && currentPage === 'contact' ? 'active' : '' %>"
+          >Contact</a
+        >
+      </li>
+      <li>
+        <a href="/logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<style>
+  /* Modern Navbar Styles */
+  .modern-navbar {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 1rem 0;
+  }
+
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .navbar-menu a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: var(--transition);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+  }
+
+  .navbar-menu a:hover,
+  .navbar-menu a.active {
+    color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  .navbar-dropdown {
+    position: relative;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--transition);
+    z-index: 1001;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .navbar-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+  }
+
+  .dropdown-menu a:hover {
+    background: var(--background);
+  }
+
+  .logout-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .logout-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-menu-btn {
+      display: block;
+    }
+
+    .navbar-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      flex-direction: column;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      border-top: 1px solid var(--border);
+    }
+
+    .navbar-menu.active {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  function toggleMobileMenu() {
+    const menu = document.getElementById("navbarMenu");
+    menu.classList.toggle("active");
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener("click", function (event) {
+    const menu = document.getElementById("navbarMenu");
+    const mobileBtn = document.querySelector(".mobile-menu-btn");
+
+    if (!menu.contains(event.target) && !mobileBtn.contains(event.target)) {
+      menu.classList.remove("active");
+    }
+  });
+</script>

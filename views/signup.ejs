@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - Saarthi</title>
+    <link rel="stylesheet" href="/css/modern.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      
+      .signup-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        width: 100%;
+        max-width: 900px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 600px;
+      }
+      
+      .signup-form-section {
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      
+      .signup-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      
+      .signup-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      
+      .signup-header p {
+        color: var(--text-secondary);
+      }
+      
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .input-group {
+        position: relative;
+      }
+      
+      .input-group i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        transition: var(--transition);
+      }
+      
+      .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--surface);
+      }
+      
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      
+      .form-input:focus + i {
+        color: var(--primary-color);
+      }
+      
+      .signup-btn {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 1rem;
+      }
+      
+      .signup-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+      
+      .signup-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        position: relative;
+      }
+      
+      .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border);
+      }
+      
+      .divider span {
+        background: var(--surface);
+        padding: 0 1rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+      
+      .login-link {
+        text-align: center;
+      }
+      
+      .login-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+      }
+      
+      .login-link a:hover {
+        color: var(--primary-dark);
+      }
+      
+      .welcome-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .welcome-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+      
+      .welcome-content {
+        position: relative;
+        z-index: 1;
+      }
+      
+      .welcome-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+      }
+      
+      .welcome-section h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        max-width: 300px;
+      }
+      
+      .benefits-list {
+        margin-top: 2rem;
+        text-align: left;
+      }
+      
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+      }
+      
+      .benefit-item i {
+        color: var(--accent-color);
+      }
+      
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+      
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .signup-container {
+          grid-template-columns: 1fr;
+          max-width: 400px;
+        }
+        
+        .welcome-section {
+          display: none;
+        }
+        
+        .signup-form-section {
+          padding: 2rem 1.5rem;
+        }
+      }
+      
+      /* Animations */
+      .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+      }
+      
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="signup-container">
+      <!-- Signup Form Section -->
+      <div class="signup-form-section fade-in-up">
+        <div class="signup-header">
+          <h1><i class="fas fa-user-plus"></i> Join Saarthi</h1>
+          <p>Create your account and start your learning journey</p>
+        </div>
+        
+        <!-- Error/Success Messages -->
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+        
+        <form id="signupForm" action="/signup" method="post">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div class="input-group">
+              <input type="text" name="username" class="form-input" required placeholder="Choose a username">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <div class="input-group">
+              <input type="email" name="email" class="form-input" required placeholder="Enter your email">
+              <i class="fas fa-envelope"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <div class="input-group">
+              <input type="tel" name="phone" class="form-input" required placeholder="Enter your phone number">
+              <i class="fas fa-phone"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <input type="password" name="password" class="form-input" required placeholder="Create a password">
+              <i class="fas fa-lock"></i>
+            </div>
+          </div>
+          
+          <button type="submit" class="signup-btn" id="signupBtn">
+            <i class="fas fa-user-plus"></i> Create Account
+          </button>
+        </form>
+        
+        <div class="divider">
+          <span>Already have an account?</span>
+        </div>
+        
+        <div class="login-link">
+          <a href="/login">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </a>
+        </div>
+      </div>
+      
+      <!-- Welcome Section -->
+      <div class="welcome-section slide-in-right">
+        <div class="welcome-content">
+          <div class="welcome-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <h2>Start Learning Today</h2>
+          <p>Join our community of learners and discover the power of AI-enhanced education.</p>
+          
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <i class="fas fa-rocket"></i>
+              <span>Instant AI-powered assistance</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-brain"></i>
+              <span>Personalized learning experience</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-clock"></i>
+              <span>24/7 study support</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-trophy"></i>
+              <span>Track your progress</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const signupForm = document.getElementById('signupForm');
+      const signupBtn = document.getElementById('signupBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+
+      // Show loading state
+      function showLoading() {
+        signupBtn.disabled = true;
+        signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      }
+
+      function hideLoading() {
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+      }
+
+      function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+      }
+
+      function hideMessages() {
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+      }
+
+      // Form validation
+      function validateForm() {
+        const username = document.querySelector('input[name="username"]').value.trim();
+        const email = document.querySelector('input[name="email"]').value.trim();
+        const phone = document.querySelector('input[name="phone"]').value.trim();
+        const password = document.querySelector('input[name="password"]').value;
+
+        if (!username || !email || !phone || !password) {
+          showError('Please fill in all fields');
+          return false;
+        }
+
+        if (password.length < 6) {
+          showError('Password must be at least 6 characters long');
+          return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showError('Please enter a valid email address');
+          return false;
+        }
+
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(phone)) {
+          showError('Please enter a valid phone number');
+          return false;
+        }
+
+        return true;
+      }
+
+      // Form submission
+      signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+          return;
+        }
+        
+        showLoading();
+        hideMessages();
+        
+        // Submit form
+        signupForm.submit();
+      });
+
+      // Check for flash messages
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if there are any flash messages from the server
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+          showError(decodeURIComponent(error));
+        }
+      });
+
+      // Add input focus effects
+      const inputs = document.querySelectorAll('.form-input');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.querySelector('i').style.color = 'var(--primary-color)';
+        });
+        
+        input.addEventListener('blur', function() {
+          if (!this.value) {
+            this.parentElement.querySelector('i').style.color = 'var(--text-secondary)';
+          }
+        });
+      });
+
+      // Real-time validation
+      const emailInput = document.querySelector('input[name="email"]');
+      emailInput.addEventListener('blur', function() {
+        const email = this.value.trim();
+        if (email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            this.style.borderColor = '#dc2626';
+          } else {
+            this.style.borderColor = '#10b981';
+          }
+        }
+      });
+
+      const passwordInput = document.querySelector('input[name="password"]');
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        if (password.length > 0) {
+          if (password.length < 6) {
+            this.style.borderColor = '#dc2626';
+          } else {
+            this.style.borderColor = '#10b981';
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
