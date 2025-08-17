@@ -218,7 +218,19 @@ app.use((req, res, next) => {
 if (!process.env.VERCEL) {
   const port = process.env.PORT || 3000;
   app.listen(port, () => {
-    console.log("listening to the port " + port);
+    console.log("✅ Server listening on port " + port);
+    
+    if (!ENV.DB_URL) {
+      console.log("⚠️  WARNING: Database URL is not defined! Check your environment variables.");
+      console.log("🔍 Access the debug page at http://localhost:" + port + "/_debug for more information");
+    } else if (!mongoose.connection.readyState) {
+      console.log("⚠️  WARNING: Database connection failed. Check your MongoDB connection.");
+      console.log("🔍 Access the debug page at http://localhost:" + port + "/_debug for more information");
+    } else {
+      console.log("✅ Database connected successfully");
+    }
+    
+    console.log(`📊 Health check available at http://localhost:${port}/_healthcheck`);
   });
 }
 
@@ -829,6 +841,7 @@ app.get("/_debug", (req, res) => {
           .success { color: #5cb85c; }
           code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
           pre { background: #f5f5f5; padding: 15px; overflow-x: auto; }
+          img { max-width: 100%; border: 1px solid #ddd; margin: 10px 0; }
         </style>
       </head>
       <body>
@@ -844,27 +857,62 @@ app.get("/_debug", (req, res) => {
         </div>
 
         <div class="box">
-          <h2>How to Fix</h2>
-          <p>To fix the missing environment variables:</p>
+          <h2>How to Fix in Vercel</h2>
+          <p>To fix the missing environment variables in Vercel:</p>
           <ol>
-            <li>Go to your Vercel project settings</li>
-            <li>Click on "Environment Variables"</li>
-            <li>Add the following environment variables:
+            <li>Go to your <a href="https://vercel.com/dashboard" target="_blank">Vercel Dashboard</a></li>
+            <li>Select your project (Saarthi)</li>
+            <li>Click on "Settings" in the top navigation</li>
+            <li>Select "Environment Variables" from the left sidebar</li>
+            <li>Add each environment variable:
               <ul>
                 <li><code>ATLASDB_URL</code>: Your MongoDB connection string</li>
                 <li><code>SECRET</code>: A random string for session encryption</li>
                 <li><code>GEMINI_API_KEY</code>: Your Google Gemini API key</li>
               </ul>
             </li>
-            <li>Redeploy your application</li>
+            <li>Make sure to select all environments (Production, Preview, Development) where appropriate</li>
+            <li>Click "Save" after adding each variable</li>
+            <li>Redeploy your application by going to the "Deployments" tab and clicking "Redeploy"</li>
           </ol>
         </div>
 
         <div class="box">
-          <h2>Example .env File Structure</h2>
+          <h2>How to Fix Locally</h2>
+          <p>If you're running the application locally, create a <code>.env</code> file in the root directory with the following content:</p>
           <pre>ATLASDB_URL=mongodb+srv://username:password@cluster.mongodb.net/database
 SECRET=your_random_secret_string
 GEMINI_API_KEY=your_gemini_api_key</pre>
+        </div>
+
+        <div class="box">
+          <h2>MongoDB Atlas Setup</h2>
+          <p>If you need to create a MongoDB database:</p>
+          <ol>
+            <li>Go to <a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a> and create an account</li>
+            <li>Create a new cluster (the free tier is sufficient)</li>
+            <li>Click "Connect" on your cluster</li>
+            <li>Select "Connect your application"</li>
+            <li>Copy the connection string and replace &lt;password&gt; with your database user password</li>
+            <li>Add this connection string as the <code>ATLASDB_URL</code> environment variable</li>
+          </ol>
+        </div>
+
+        <div class="box">
+          <h2>Gemini API Key</h2>
+          <p>To get a Gemini API key:</p>
+          <ol>
+            <li>Go to <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></li>
+            <li>Sign in with your Google account</li>
+            <li>Navigate to the "API keys" section</li>
+            <li>Create a new API key</li>
+            <li>Copy the API key and add it as the <code>GEMINI_API_KEY</code> environment variable</li>
+          </ol>
+        </div>
+        
+        <div class="box">
+          <h2>Need Help?</h2>
+          <p>If you're still having issues, check the <a href="/_healthcheck" target="_blank">Health Check Endpoint</a> for more diagnostic information.</p>
         </div>
       </body>
     </html>
@@ -872,8 +920,12 @@ GEMINI_API_KEY=your_gemini_api_key</pre>
 });
 
 app.all("*", (req, res) => {
-  // If the database is not connected, show an error page
-  if (!ENV.DB_URL) {
+  // Define paths that should be accessible even without database
+  const publicPaths = ['/main', '/login', '/signup', '/_debug', '/_healthcheck', '/'];
+  const isPublicPath = publicPaths.some(path => req.path === path || req.path.startsWith('/public/') || req.path.startsWith('/images/'));
+  
+  // If it's not a public path and the database is not connected, show an error page
+  if (!ENV.DB_URL && !isPublicPath) {
     return res.status(500).send(`
       <html>
         <head>
@@ -884,6 +936,8 @@ app.all("*", (req, res) => {
             .box { border: 1px solid #d9534f; padding: 20px; margin-bottom: 20px; border-radius: 5px; background: #f9f2f4; }
             a { color: #0275d8; text-decoration: none; }
             a:hover { text-decoration: underline; }
+            .links { margin-top: 20px; }
+            .links a { margin: 0 10px; }
           </style>
         </head>
         <body>
@@ -893,6 +947,11 @@ app.all("*", (req, res) => {
             <p>Please visit <a href="/_debug">the debug page</a> for more information on how to fix this issue.</p>
           </div>
           <p>If you're the site administrator, please configure your environment variables in the Vercel dashboard.</p>
+          <div class="links">
+            <a href="/main">Home</a> | 
+            <a href="/login">Login</a> | 
+            <a href="/signup">Signup</a>
+          </div>
         </body>
       </html>
     `);
